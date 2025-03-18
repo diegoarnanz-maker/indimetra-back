@@ -21,7 +21,6 @@ public class RoleServiceImplMy8 extends GenericoCRUDServiceImplMy8<Role, Long> i
 
     @Override
     public Optional<Role> findByName(String name) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'findByName'");
+        return roleRepository.findByName(name);
     }
 }

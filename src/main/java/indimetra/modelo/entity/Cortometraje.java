@@ -1,6 +1,7 @@
 package indimetra.modelo.entity;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 
 import jakarta.persistence.*;
@@ -40,7 +41,7 @@ public class Cortometraje implements Serializable {
     private String language;
 
     @Column(precision = 3, scale = 1)
-    private Double rating;
+    private BigDecimal rating;
 
     @Column(name = "image_url")
     private String imageUrl;

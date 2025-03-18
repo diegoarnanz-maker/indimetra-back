@@ -21,13 +21,11 @@ public class UserServiceImplMy8 extends GenericoCRUDServiceImplMy8<User, Long> i
 
     @Override
     public Optional<User> findByUsername(String username) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'findByUsername'");
+        return userRepository.findByUsername(username);
     }
 
     @Override
     public Optional<User> findByEmail(String email) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'findByEmail'");
+        return userRepository.findByEmail(email);
     }
 }

@@ -1,9 +1,14 @@
 package indimetra.modelo.entity;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -15,7 +20,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class User implements Serializable {
+public class User implements Serializable, UserDetails {
 
     private static final long serialVersionUID = 1L;
 
@@ -35,8 +40,9 @@ public class User implements Serializable {
     @Column(name = "profile_image")
     private String profileImage;
 
+    @Builder.Default
     @Column(name = "is_author")
-    private Boolean isAuthor;
+    private Boolean isAuthor = false;
 
     @Column(name = "social_links")
     private String socialLinks;
@@ -48,13 +54,10 @@ public class User implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt;
 
+    @Builder.Default
     @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-        name = "user_roles",
-        joinColumns = @JoinColumn(name = "user_id"),
-        inverseJoinColumns = @JoinColumn(name = "role_id")
-    )
-    private Set<Role> roles;
+    @JoinTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
+    private Set<Role> roles = new HashSet<>();
 
     @PrePersist
     protected void onCreate() {
@@ -62,4 +65,12 @@ public class User implements Serializable {
             this.createdAt = new Date();
         }
     }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return roles.stream()
+                .map(r -> new SimpleGrantedAuthority(r.getName().name()))
+                .toList();
+    }
+
 }
