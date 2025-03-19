@@ -10,9 +10,12 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import indimetra.modelo.dto.LoginDto;
 import indimetra.modelo.dto.UserRequestDto;
+import indimetra.modelo.dto.UserResponseDto;
 import indimetra.modelo.entity.Role;
 import indimetra.modelo.entity.User;
 import indimetra.modelo.service.IRoleService;
@@ -106,7 +110,14 @@ public class AuthRestcontroller {
 
             User newUser = userService.create(user);
 
-            return ResponseEntity.status(201).body(newUser);
+            UserResponseDto responseDto = modelMapper.map(newUser, UserResponseDto.class);
+
+            responseDto.setRoles(
+                    newUser.getRoles().stream()
+                            .map(role -> role.getName().name())
+                            .collect(Collectors.toSet()));
+
+            return ResponseEntity.status(201).body(responseDto);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -114,6 +125,13 @@ public class AuthRestcontroller {
         }
     }
 
-    // @GetMapping("/me")
+    @GetMapping("/me")
+    public ResponseEntity<UserResponseDto> getAuthenticatedUser(Authentication authentication) {
+        String username = authentication.getName();
+        User user = userService.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + username));
+
+        return ResponseEntity.ok(modelMapper.map(user, UserResponseDto.class));
+    }
 
 }
