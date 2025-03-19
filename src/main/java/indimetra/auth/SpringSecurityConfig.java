@@ -46,7 +46,8 @@ public class SpringSecurityConfig {
                         
                         // CORTOMETRAJES
                         // Rutas públicas
-
+                        .requestMatchers("/cortometraje").permitAll()
+                        .requestMatchers("/cortometraje/{id}").permitAll()
                         // Rutas ROLE_ADMIN
 
                         // REVIEWS
