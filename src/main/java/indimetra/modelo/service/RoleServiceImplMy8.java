@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import indimetra.modelo.entity.Role;
+import indimetra.modelo.entity.Role.RoleType;
 import indimetra.modelo.repository.IRoleRepository;
 
 @Service
@@ -21,6 +22,12 @@ public class RoleServiceImplMy8 extends GenericoCRUDServiceImplMy8<Role, Long> i
 
     @Override
     public Optional<Role> findByName(String name) {
-        return roleRepository.findByName(name);
+        try {
+            RoleType roleType = RoleType.valueOf(name);
+            return roleRepository.findByName(roleType);
+        } catch (IllegalArgumentException e) {
+            return Optional.empty();
+        }
     }
+
 }

@@ -98,16 +98,18 @@ public class AuthRestcontroller {
                 return ResponseEntity.badRequest().body(Map.of("message", "Error: Rol no encontrado"));
             }
 
+            String encodedPassword = passwordEncoder.encode(userDto.getPassword());
+
             User user = modelMapper.map(userDto, User.class);
-            user.setPassword(passwordEncoder.encode(userDto.getPassword()));
+            user.setPassword(encodedPassword);
             user.setRoles(Collections.singleton(userRole.get()));
-            user.setIsAuthor(false);
 
             User newUser = userService.create(user);
 
             return ResponseEntity.status(201).body(newUser);
 
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(500).body(Map.of("message", "Error al registrar el usuario"));
         }
     }
