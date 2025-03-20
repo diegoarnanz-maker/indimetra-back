@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 // import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
@@ -41,14 +42,15 @@ public class SpringSecurityConfig {
 
                 .authorizeHttpRequests(authorize -> authorize
                         // AUTHORIZATION
-                        .requestMatchers("/auth/login", "/auth/register").permitAll()
-                        .requestMatchers("/auth/me").authenticated()
+                        .requestMatchers(HttpMethod.POST,"/auth/login", "/auth/register").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/auth/me").authenticated()
                         
                         // CORTOMETRAJES
                         // Rutas públicas
-                        .requestMatchers("/cortometraje").permitAll()
-                        .requestMatchers("/cortometraje/{id}").permitAll()
-                        // Rutas ROLE_ADMIN
+                        .requestMatchers(HttpMethod.GET,"/cortometraje").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/cortometraje/{id}").permitAll()
+                        // Rutas ROLE_USER
+                        .requestMatchers(HttpMethod.POST,"/cortometraje").hasAuthority("ROLE_USER")
 
                         // REVIEWS
                         // Rutas públicas

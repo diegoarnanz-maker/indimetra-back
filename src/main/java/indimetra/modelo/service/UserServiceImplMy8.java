@@ -15,6 +15,7 @@ import indimetra.modelo.dto.UserRequestDto;
 import indimetra.modelo.entity.Role;
 import indimetra.modelo.entity.User;
 import indimetra.modelo.repository.IUserRepository;
+import jakarta.transaction.Transactional;
 
 @Service
 public class UserServiceImplMy8 extends GenericoCRUDServiceImplMy8<User, Long>
@@ -88,4 +89,15 @@ public class UserServiceImplMy8 extends GenericoCRUDServiceImplMy8<User, Long>
 
         return userRepository.save(user);
     }
+
+    @Override
+    @Transactional
+    public void updateAuthorStatus(Long userId, boolean isAuthor) {
+        User existingUser = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        existingUser.setIsAuthor(isAuthor);
+        userRepository.save(existingUser);
+    }
+
 }

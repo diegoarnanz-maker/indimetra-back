@@ -11,6 +11,8 @@ public interface IUserService extends IGenericoCRUD<User, Long> {
 
     User registerUser(UserRequestDto userDto);
 
+    void updateAuthorStatus(Long userId, boolean isAuthor);
+
     Optional<User> findByUsername(String username);
 
     Optional<User> findByEmail(String email);

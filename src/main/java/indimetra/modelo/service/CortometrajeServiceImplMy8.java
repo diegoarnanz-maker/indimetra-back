@@ -1,5 +1,6 @@
 package indimetra.modelo.service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -49,5 +50,10 @@ public class CortometrajeServiceImplMy8 extends GenericoCRUDServiceImplMy8<Corto
     public List<Cortometraje> findLatestSeries() {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'findLatestSeries'");
+    }
+
+    @Override
+    public void updateRating(Long id, BigDecimal rating) {
+        cortometrajeRepository.updateRating(id, rating);
     }
 }
