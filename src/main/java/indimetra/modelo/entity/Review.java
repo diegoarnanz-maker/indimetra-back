@@ -1,6 +1,7 @@
 package indimetra.modelo.entity;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 
 import jakarta.persistence.*;
@@ -30,7 +31,7 @@ public class Review implements Serializable {
     private Cortometraje cortometraje;
 
     @Column(nullable = false, precision = 3, scale = 1)
-    private Double rating;
+    private BigDecimal rating;
 
     @Column(columnDefinition = "TEXT")
     private String comment;
