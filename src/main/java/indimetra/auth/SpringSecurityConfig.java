@@ -52,14 +52,15 @@ public class SpringSecurityConfig {
                         // Rutas ROLE_USER
                         .requestMatchers(HttpMethod.POST,"/cortometraje").hasAuthority("ROLE_USER")
 
-                        // REVIEWS
+                        // CATEGORY
                         // Rutas públicas
+                        .requestMatchers(HttpMethod.GET,"/category", "/category/{id}").permitAll()
 
-                        // Rutas ROLE_USER
-
-                        // Rutas ROLE_ADMIN / ROLE_USER
+                        // Rutas ROLE_ADMIN
+                        .requestMatchers(HttpMethod.POST,"/category").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers(HttpMethod.PUT,"/category/{id}").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers(HttpMethod.DELETE,"/category/{id}").hasAuthority("ROLE_ADMIN")
                         
-
                         // FAVORITES
                         // Rutas ROLE_ADMIN / ROLE_USER
                         
