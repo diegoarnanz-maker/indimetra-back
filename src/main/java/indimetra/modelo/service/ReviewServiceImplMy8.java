@@ -1,5 +1,7 @@
 package indimetra.modelo.service;
 
+import java.math.BigDecimal;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -11,6 +13,9 @@ public class ReviewServiceImplMy8 extends GenericoCRUDServiceImplMy8<Review, Lon
 
     @Autowired
     private IReviewRepository reviewRepository;
+
+    @Autowired
+    private ICortometrajeService cortometrajeService;
 
     @Override
     protected IReviewRepository getRepository() {
@@ -28,4 +33,10 @@ public class ReviewServiceImplMy8 extends GenericoCRUDServiceImplMy8<Review, Lon
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'existsByUserAndSeries'");
     }
+
+    public void actualizarRatingCortometraje(Long cortometrajeId) {
+        BigDecimal promedio = reviewRepository.calcularPromedioRating(cortometrajeId);
+        cortometrajeService.updateRating(cortometrajeId, promedio != null ? promedio : BigDecimal.ZERO);
+    }
+
 }
