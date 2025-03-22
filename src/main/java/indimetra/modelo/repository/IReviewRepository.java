@@ -10,8 +10,11 @@ import indimetra.modelo.entity.Review;
 
 public interface IReviewRepository extends JpaRepository<Review, Long> {
 
-    //Hay que hacer pruebas para ver si funciona
+    // Hay que hacer pruebas para ver si funciona
     @Query("SELECT COALESCE(AVG(r.rating), 0) FROM Review r WHERE r.cortometraje.id = :cortometrajeId")
     BigDecimal calcularPromedioRating(@Param("cortometrajeId") Long cortometrajeId);
+
+    // En IReviewRepository.java
+    boolean existsByUserIdAndCortometrajeId(Long userId, Long cortometrajeId);
 
 }

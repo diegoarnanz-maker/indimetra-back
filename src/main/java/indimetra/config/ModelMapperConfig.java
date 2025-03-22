@@ -10,8 +10,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import indimetra.modelo.dto.CortometrajeResponseDto;
+import indimetra.modelo.dto.ReviewResponseDto;
 import indimetra.modelo.dto.UserResponseDto;
 import indimetra.modelo.entity.Cortometraje;
+import indimetra.modelo.entity.Review;
 import indimetra.modelo.entity.Role;
 import indimetra.modelo.entity.User;
 
@@ -23,10 +25,9 @@ public class ModelMapperConfig {
         ModelMapper modelMapper = new ModelMapper();
 
         // Transformar roles de Role a Set<String>
-        Converter<Set<Role>, Set<String>> roleConverter = ctx ->
-                ctx.getSource().stream()
-                        .map(role -> role.getName().name())
-                        .collect(Collectors.toSet());
+        Converter<Set<Role>, Set<String>> roleConverter = ctx -> ctx.getSource().stream()
+                .map(role -> role.getName().name())
+                .collect(Collectors.toSet());
 
         // Mapeo de User a UserResponseDto
         modelMapper.typeMap(User.class, UserResponseDto.class)
@@ -44,6 +45,17 @@ public class ModelMapperConfig {
                     protected void configure() {
                         map().setCategory(source.getCategory().getName());
                         map().setAuthor(source.getUser().getUsername());
+                    }
+                });
+
+        // Mapeo de Review a ReviewResponseDto
+        modelMapper.typeMap(Review.class, ReviewResponseDto.class)
+                .addMappings(new PropertyMap<Review, ReviewResponseDto>() {
+                    @Override
+                    protected void configure() {
+                        map().setUsername(source.getUser().getUsername());
+                        map().setCortometrajeId(source.getCortometraje().getId());
+                        map().setCortometrajeTitle(source.getCortometraje().getTitle());
                     }
                 });
 

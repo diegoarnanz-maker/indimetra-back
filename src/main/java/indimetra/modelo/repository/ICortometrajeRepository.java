@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 import indimetra.modelo.entity.Cortometraje;
 
@@ -13,7 +14,8 @@ public interface ICortometrajeRepository extends JpaRepository<Cortometraje, Lon
 
     //Hay que hacer pruebas para ver si funciona
     @Modifying
+    @Transactional
     @Query("UPDATE Cortometraje c SET c.rating = :rating WHERE c.id = :id")
     void updateRating(@Param("id") Long id, @Param("rating") BigDecimal rating);
-
+    
 }

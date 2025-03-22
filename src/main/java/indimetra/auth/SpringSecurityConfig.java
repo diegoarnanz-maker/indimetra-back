@@ -42,32 +42,33 @@ public class SpringSecurityConfig {
 
                 .authorizeHttpRequests(authorize -> authorize
                         // AUTHORIZATION
-                        .requestMatchers(HttpMethod.POST,"/auth/login", "/auth/register").permitAll()
-                        .requestMatchers(HttpMethod.GET,"/auth/me").authenticated()
-                        
+                        .requestMatchers(HttpMethod.POST, "/auth/login", "/auth/register").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/auth/me").authenticated()
+
                         // CORTOMETRAJES
                         // Rutas públicas
-                        .requestMatchers(HttpMethod.GET,"/cortometraje").permitAll()
-                        .requestMatchers(HttpMethod.GET,"/cortometraje/{id}").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/cortometraje").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/cortometraje/{id}").permitAll()
                         // Rutas ROLE_USER
-                        .requestMatchers(HttpMethod.POST,"/cortometraje").hasAuthority("ROLE_USER")
+                        .requestMatchers(HttpMethod.POST, "/cortometraje").hasAuthority("ROLE_USER")
 
                         // CATEGORY
                         // Rutas públicas
-                        .requestMatchers(HttpMethod.GET,"/category", "/category/{id}").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/category", "/category/{id}").permitAll()
 
                         // Rutas ROLE_ADMIN
-                        .requestMatchers(HttpMethod.POST,"/category").hasAuthority("ROLE_ADMIN")
-                        .requestMatchers(HttpMethod.PUT,"/category/{id}").hasAuthority("ROLE_ADMIN")
-                        .requestMatchers(HttpMethod.DELETE,"/category/{id}").hasAuthority("ROLE_ADMIN")
-                        
-                        // FAVORITES
-                        // Rutas ROLE_ADMIN / ROLE_USER
-                        
+                        .requestMatchers(HttpMethod.POST, "/category").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/category/{id}").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/category/{id}").hasAuthority("ROLE_ADMIN")
 
-                        // ROLE_USER(owner)
-                        // .requestMatchers(HttpMethod.POST, "/api/favorites")
-                        // .hasAuthority("ROLE_USER")
+                        // REVIEW
+                        .requestMatchers(HttpMethod.GET, "/review").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/review/{id}").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/review").hasAuthority("ROLE_USER")
+
+                        // ROLE_USER(owner) / ROLE_ADMIN
+                        .requestMatchers(HttpMethod.PUT, "/review/{id}").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/review/{id}").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
 
                         // USER
                         // ROLE_ADMIN

@@ -39,4 +39,9 @@ public class ReviewServiceImplMy8 extends GenericoCRUDServiceImplMy8<Review, Lon
         cortometrajeService.updateRating(cortometrajeId, promedio != null ? promedio : BigDecimal.ZERO);
     }
 
+    @Override
+    public boolean existsByUserAndCortometraje(Long userId, Long cortometrajeId) {
+        return reviewRepository.existsByUserIdAndCortometrajeId(userId, cortometrajeId);
+    }
+
 }

@@ -20,4 +20,6 @@ public interface IReviewService extends IGenericoCRUD<Review, Long> {
 
     void actualizarRatingCortometraje(Long cortometrajeId);
 
+    boolean existsByUserAndCortometraje(Long userId, Long cortometrajeId);
+
 }
