@@ -1,6 +1,7 @@
 package indimetra.restcontroller;
 
 import java.util.List;
+import java.util.Map;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,8 +62,7 @@ public class CategoryRestcontroller {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<CategoryResponseDto> update(@PathVariable Long id,
-            @RequestBody @Valid CategoryRequestDto dto) {
+    public ResponseEntity<CategoryResponseDto> update(@PathVariable Long id, @RequestBody @Valid CategoryRequestDto dto) {
 
         Category category = modelMapper.map(dto, Category.class);
         category.setId(id);
@@ -74,9 +74,9 @@ public class CategoryRestcontroller {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
+    public ResponseEntity<Map<String, String>> delete(@PathVariable Long id) {
         categoryService.delete(id);
-        return ResponseEntity.status(204).build();
+        return ResponseEntity.ok(Map.of("message", "Categoría eliminada correctamente"));
     }
 
 }

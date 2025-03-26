@@ -22,7 +22,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import indimetra.modelo.dto.LoginDto;
+import indimetra.modelo.dto.LoginRequestDto;
 import indimetra.modelo.dto.UserRequestDto;
 import indimetra.modelo.dto.UserResponseDto;
 import indimetra.modelo.entity.Role;
@@ -94,7 +94,7 @@ public class AuthRestcontrollerTest {
 
     @Test
     void testLoginSuccess() throws Exception {
-        LoginDto loginDto = new LoginDto("testuser", "password");
+        LoginRequestDto loginDto = new LoginRequestDto("testuser", "password");
 
         when(userService.findByUsername("testuser")).thenReturn(Optional.of(mockUser));
         when(passwordEncoder.matches("password", "encodedpassword")).thenReturn(true);
@@ -111,7 +111,7 @@ public class AuthRestcontrollerTest {
 
     @Test
     void testLoginUserNotFound() throws Exception {
-        LoginDto loginDto = new LoginDto("notFound", "password");
+        LoginRequestDto loginDto = new LoginRequestDto("notFound", "password");
 
         when(userService.findByUsername("notFound")).thenReturn(Optional.empty());
 

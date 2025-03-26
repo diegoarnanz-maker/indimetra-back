@@ -1,11 +1,13 @@
 package indimetra.modelo.service;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import indimetra.modelo.entity.Review;
+import indimetra.modelo.entity.User;
 import indimetra.modelo.repository.IReviewRepository;
 
 @Service
@@ -42,6 +44,16 @@ public class ReviewServiceImplMy8 extends GenericoCRUDServiceImplMy8<Review, Lon
     @Override
     public boolean existsByUserAndCortometraje(Long userId, Long cortometrajeId) {
         return reviewRepository.existsByUserIdAndCortometrajeId(userId, cortometrajeId);
+    }
+
+    @Override
+    public Optional<Review> findByIdIfOwnerOrAdmin(Long id, User user) {
+        return read(id).filter(review -> {
+            boolean isAdmin = user.getRoles().stream()
+                    .anyMatch(r -> r.getName().name().equals("ROLE_ADMIN"));
+            boolean isOwner = review.getUser().getId().equals(user.getId());
+            return isAdmin || isOwner;
+        });
     }
 
 }

@@ -26,126 +26,124 @@ import jakarta.validation.Valid;
 @RequestMapping("/cortometraje")
 public class CortometrajeRestcontroller {
 
-    @Autowired
-    private ICortometrajeService cortometrajeService;
+        @Autowired
+        private ICortometrajeService cortometrajeService;
 
-    @Autowired
-    private IUserService userService;
+        @Autowired
+        private IUserService userService;
 
-    @Autowired
-    private ICategoryService categoryService;
+        @Autowired
+        private ICategoryService categoryService;
 
-    @Autowired
-    private ModelMapper modelMapper;
+        @Autowired
+        private ModelMapper modelMapper;
 
-    @GetMapping
-    public ResponseEntity<List<CortometrajeResponseDto>> findAll() {
-        List<Cortometraje> cortometrajes = cortometrajeService.findAll();
+        @GetMapping
+        public ResponseEntity<List<CortometrajeResponseDto>> findAll() {
+                List<Cortometraje> cortometrajes = cortometrajeService.findAll();
 
-        List<CortometrajeResponseDto> response = cortometrajes.stream()
-                .map(cortometraje -> modelMapper.map(cortometraje, CortometrajeResponseDto.class))
-                .collect(Collectors.toList());
+                List<CortometrajeResponseDto> response = cortometrajes.stream()
+                                .map(cortometraje -> modelMapper.map(cortometraje, CortometrajeResponseDto.class))
+                                .collect(Collectors.toList());
 
-        return ResponseEntity.status(200).body(response);
-    }
-
-    @GetMapping("{id}")
-    public ResponseEntity<CortometrajeResponseDto> read(@PathVariable Long id) {
-        Cortometraje cortometraje = cortometrajeService.read(id)
-                .orElseThrow(() -> new RuntimeException("Cortometraje no encontrado"));
-
-        CortometrajeResponseDto response = modelMapper.map(cortometraje, CortometrajeResponseDto.class);
-
-        return ResponseEntity.status(200).body(response);
-    }
-
-    @PostMapping
-    public ResponseEntity<CortometrajeResponseDto> create(@RequestBody @Valid CortometrajeRequestDto cortometrajeDto,
-            Authentication authentication) {
-
-        User autor = userService.findByUsername(authentication.getName())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado: " + authentication.getName()));
-
-        Cortometraje cortometraje = modelMapper.map(cortometrajeDto, Cortometraje.class);
-
-        cortometraje.setUser(autor);
-
-        Category categoria = categoryService.findByName(cortometrajeDto.getCategory())
-                .orElseThrow(() -> new RuntimeException("Categoría no encontrada: " + cortometrajeDto.getCategory()));
-
-        cortometraje.setCategory(categoria);
-
-        Cortometraje nuevoCortometraje = cortometrajeService.create(cortometraje);
-
-        boolean esUsuario = autor.getRoles().stream()
-                .anyMatch(rol -> rol.getName().equals(Role.RoleType.ROLE_USER));
-
-        if (esUsuario && !autor.getIsAuthor()) {
-            userService.updateAuthorStatus(autor.getId(), true);
+                return ResponseEntity.status(200).body(response);
         }
 
-        CortometrajeResponseDto response = modelMapper.map(nuevoCortometraje, CortometrajeResponseDto.class);
-        response.setAuthor(autor.getUsername());
-        response.setCategory(categoria.getName());
+        @GetMapping("{id}")
+        public ResponseEntity<CortometrajeResponseDto> read(@PathVariable Long id) {
+                Cortometraje cortometraje = cortometrajeService.read(id)
+                                .orElseThrow(() -> new RuntimeException("Cortometraje no encontrado"));
 
-        return ResponseEntity.status(201).body(response);
-    }
+                CortometrajeResponseDto response = modelMapper.map(cortometraje, CortometrajeResponseDto.class);
 
-    @PutMapping("{id}")
-    public ResponseEntity<CortometrajeResponseDto> update(@PathVariable Long id,
-            @RequestBody @Valid CortometrajeRequestDto cortometrajeDto,
-            Authentication authentication) {
-
-        Cortometraje cortometrajeExistente = cortometrajeService.read(id)
-                .orElseThrow(() -> new RuntimeException("Cortometraje no encontrado con ID: " + id));
-
-        User autor = userService.findByUsername(authentication.getName())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado: " + authentication.getName()));
-
-        boolean esPropietario = cortometrajeExistente.getUser().getId().equals(autor.getId());
-        boolean esAdmin = autor.getRoles().stream()
-                .anyMatch(rol -> rol.getName().equals(Role.RoleType.ROLE_ADMIN));
-
-        if (!esPropietario && !esAdmin) {
-            return ResponseEntity.status(403).body(null);
+                return ResponseEntity.status(200).body(response);
         }
 
-        modelMapper.map(cortometrajeDto, cortometrajeExistente);
+        @PostMapping
+        public ResponseEntity<CortometrajeResponseDto> create(
+                        @RequestBody @Valid CortometrajeRequestDto cortometrajeDto,
+                        Authentication authentication) {
 
-        Category categoria = categoryService.findByName(cortometrajeDto.getCategory())
-                .orElseThrow(() -> new RuntimeException("Categoría no encontrada: " + cortometrajeDto.getCategory()));
+                User autor = userService.findByUsername(authentication.getName())
+                                .orElseThrow(() -> new RuntimeException(
+                                                "Usuario no encontrado: " + authentication.getName()));
 
-        cortometrajeExistente.setCategory(categoria);
+                Cortometraje cortometraje = modelMapper.map(cortometrajeDto, Cortometraje.class);
 
-        Cortometraje cortometrajeActualizado = cortometrajeService.update(cortometrajeExistente);
+                cortometraje.setUser(autor);
 
-        CortometrajeResponseDto response = modelMapper.map(cortometrajeActualizado, CortometrajeResponseDto.class);
-        response.setAuthor(autor.getUsername());
-        response.setCategory(categoria.getName());
+                Category categoria = categoryService.findByName(cortometrajeDto.getCategory())
+                                .orElseThrow(() -> new RuntimeException(
+                                                "Categoría no encontrada: " + cortometrajeDto.getCategory()));
 
-        return ResponseEntity.status(200).body(response);
-    }
+                cortometraje.setCategory(categoria);
 
-    @DeleteMapping("{id}")
-    public ResponseEntity<Map<String, String>> delete(@PathVariable Long id, Authentication authentication) {
+                Cortometraje nuevoCortometraje = cortometrajeService.create(cortometraje);
 
-        Cortometraje cortometrajeExistente = cortometrajeService.read(id)
-                .orElseThrow(() -> new RuntimeException("Cortometraje no encontrado con ID: " + id));
+                boolean esUsuario = autor.getRoles().stream()
+                                .anyMatch(rol -> rol.getName().equals(Role.RoleType.ROLE_USER));
 
-        User usuarioAutenticado = userService.findByUsername(authentication.getName())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado: " + authentication.getName()));
+                if (esUsuario && !autor.getIsAuthor()) {
+                        userService.updateAuthorStatus(autor.getId(), true);
+                }
 
-        boolean esPropietario = cortometrajeExistente.getUser().getId().equals(usuarioAutenticado.getId());
-        boolean esAdmin = usuarioAutenticado.getRoles().stream()
-                .anyMatch(rol -> rol.getName().equals(Role.RoleType.ROLE_ADMIN));
+                CortometrajeResponseDto response = modelMapper.map(nuevoCortometraje, CortometrajeResponseDto.class);
+                response.setAuthor(autor.getUsername());
+                response.setCategory(categoria.getName());
 
-        if (!esPropietario && !esAdmin) {
-            return ResponseEntity.status(403)
-                    .body(Map.of("message", "No tienes permisos para eliminar este cortometraje"));
+                return ResponseEntity.status(201).body(response);
         }
 
-        cortometrajeService.delete(id);
+        @PutMapping("{id}")
+        public ResponseEntity<CortometrajeResponseDto> update(@PathVariable Long id,
+                        @RequestBody @Valid CortometrajeRequestDto cortometrajeDto,
+                        Authentication authentication) {
 
-        return ResponseEntity.status(200).body(Map.of("message", "Cortometraje eliminado correctamente"));
-    }
+                Cortometraje cortometrajeExistente = cortometrajeService.read(id)
+                                .orElseThrow(() -> new RuntimeException("Cortometraje no encontrado con ID: " + id));
+
+                User autor = userService.findByUsername(authentication.getName())
+                                .orElseThrow(() -> new RuntimeException(
+                                                "Usuario no encontrado: " + authentication.getName()));
+
+                boolean esPropietario = cortometrajeExistente.getUser().getId().equals(autor.getId());
+                boolean esAdmin = autor.getRoles().stream()
+                                .anyMatch(rol -> rol.getName().equals(Role.RoleType.ROLE_ADMIN));
+
+                if (!esPropietario && !esAdmin) {
+                        return ResponseEntity.status(403).body(null);
+                }
+
+                modelMapper.map(cortometrajeDto, cortometrajeExistente);
+
+                Category categoria = categoryService.findByName(cortometrajeDto.getCategory())
+                                .orElseThrow(() -> new RuntimeException(
+                                                "Categoría no encontrada: " + cortometrajeDto.getCategory()));
+
+                cortometrajeExistente.setCategory(categoria);
+
+                Cortometraje cortometrajeActualizado = cortometrajeService.update(cortometrajeExistente);
+
+                CortometrajeResponseDto response = modelMapper.map(cortometrajeActualizado,
+                                CortometrajeResponseDto.class);
+                response.setAuthor(autor.getUsername());
+                response.setCategory(categoria.getName());
+
+                return ResponseEntity.status(200).body(response);
+        }
+
+        @DeleteMapping("{id}")
+        public ResponseEntity<Map<String, String>> delete(@PathVariable Long id, Authentication authentication) {
+                User user = userService.findByUsername(authentication.getName())
+                                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+                cortometrajeService.findByIdIfOwnerOrAdmin(id, user)
+                                .orElseThrow(() -> new RuntimeException(
+                                                "No tienes permisos para eliminar este cortometraje"));
+
+                cortometrajeService.delete(id);
+
+                return ResponseEntity.ok(Map.of("message", "Cortometraje eliminado correctamente"));
+        }
+
 }

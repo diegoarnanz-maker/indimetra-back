@@ -21,19 +21,17 @@ public class FavoriteServiceImplMy8 extends GenericoCRUDServiceImplMy8<Favorite,
 
     @Override
     public List<Favorite> findByUserId(Long userId) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'findByUserId'");
+        return favoriteRepository.findByUserId(userId);
     }
 
     @Override
     public List<Favorite> findByUsername(String username) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'findByUsername'");
+        return favoriteRepository.findByUserUsername(username);
     }
 
     @Override
-    public boolean isFavoriteOwner(Long userId, Long seriesId) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'isFavoriteOwner'");
+    public boolean isFavoriteOwner(Long userId, Long cortometrajeId) {
+        return favoriteRepository.findByUserIdAndCortometrajeId(userId, cortometrajeId).isPresent();
     }
+
 }

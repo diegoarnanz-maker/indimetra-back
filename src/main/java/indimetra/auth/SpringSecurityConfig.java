@@ -47,14 +47,19 @@ public class SpringSecurityConfig {
 
                         // CORTOMETRAJES
                         // Rutas públicas
-                        .requestMatchers(HttpMethod.GET, "/cortometraje").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/cortometraje/{id}").permitAll()
+                        .requestMatchers(HttpMethod.GET,
+                                "/cortometraje",
+                                "/cortometraje/{id}")
+                        .permitAll()
                         // Rutas ROLE_USER
                         .requestMatchers(HttpMethod.POST, "/cortometraje").hasAuthority("ROLE_USER")
 
                         // CATEGORY
                         // Rutas públicas
-                        .requestMatchers(HttpMethod.GET, "/category", "/category/{id}").permitAll()
+                        .requestMatchers(HttpMethod.GET,
+                                "/category",
+                                "/category/{id}")
+                        .permitAll()
 
                         // Rutas ROLE_ADMIN
                         .requestMatchers(HttpMethod.POST, "/category").hasAuthority("ROLE_ADMIN")
@@ -62,19 +67,32 @@ public class SpringSecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/category/{id}").hasAuthority("ROLE_ADMIN")
 
                         // REVIEW
-                        .requestMatchers(HttpMethod.GET, "/review").authenticated()
-                        .requestMatchers(HttpMethod.GET, "/review/{id}").authenticated()
+                        .requestMatchers(HttpMethod.GET,
+                                "/review",
+                                "/review/{id}")
+                        .authenticated()
                         .requestMatchers(HttpMethod.POST, "/review").hasAuthority("ROLE_USER")
 
                         // ROLE_USER(owner) / ROLE_ADMIN
                         .requestMatchers(HttpMethod.PUT, "/review/{id}").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/review/{id}").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
 
+                        // FAVORITE
+                        // Rutas públicas
+                        .requestMatchers(HttpMethod.POST, "/favorite").hasAuthority("ROLE_USER")
+                        .requestMatchers(HttpMethod.GET, "/favorite").hasAuthority("ROLE_USER")
+
+                        // ROLE_USER(owner) / ROLE_ADMIN
+                        .requestMatchers(HttpMethod.DELETE, "/favorite/{id}").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
+
+                        // ROLE_ADMIN
+                        // .requestMatchers(HttpMethod.GET, "/favorite/all").hasAuthority("ROLE_ADMIN")
+
                         // USER
                         // ROLE_ADMIN
 
                         // ROLE_ADMIN / ROLE_USER(owner)
-
+                        
                         // OTRAS
                         .anyRequest().authenticated())
 

@@ -44,19 +44,6 @@ public class ReviewRestcontroller {
         @Autowired
         private ModelMapper modelMapper;
 
-        // HAY QUE VER EL TEMA DEL RATING
-        // @PostMapping
-        // public ResponseEntity<Review> create(@RequestBody @Valid ReviewRequestDto
-        // reviewDto) {
-        // Review review = modelMapper.map(reviewDto, Review.class);
-
-        // Review newReview = reviewService.create(review);
-
-        // reviewService.actualizarRatingCortometraje(review.getCortometraje().getId());
-
-        // return ResponseEntity.status(201).body(newReview);
-        // }
-
         @GetMapping
         public ResponseEntity<List<ReviewResponseDto>> findAll() {
                 List<Review> reviews = reviewService.findAll();
@@ -118,55 +105,35 @@ public class ReviewRestcontroller {
                         @RequestBody @Valid ReviewRequestDto dto,
                         Authentication authentication) {
 
-                Review existingReview = reviewService.read(id)
-                                .orElseThrow(() -> new RuntimeException("Reseña no encontrada con ID: " + id));
-
                 User user = userService.findByUsername(authentication.getName())
+                                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+                Review review = reviewService.findByIdIfOwnerOrAdmin(id, user)
                                 .orElseThrow(() -> new RuntimeException(
-                                                "Usuario no encontrado: " + authentication.getName()));
+                                                "No tienes permisos para modificar esta reseña"));
 
-                boolean isAdmin = user.getRoles().stream()
-                                .anyMatch(role -> role.getName().name().equals("ROLE_ADMIN"));
+                review.setRating(dto.getRating());
+                review.setComment(dto.getComment());
 
-                boolean isOwner = existingReview.getUser().getId().equals(user.getId());
-
-                if (!isAdmin && !isOwner) {
-                        return ResponseEntity.status(403).build();
-                }
-
-                // Actualizar datos
-                existingReview.setRating(dto.getRating());
-                existingReview.setComment(dto.getComment());
-
-                Review updated = reviewService.update(existingReview);
-                reviewService.actualizarRatingCortometraje(existingReview.getCortometraje().getId());
+                Review updated = reviewService.update(review);
+                reviewService.actualizarRatingCortometraje(review.getCortometraje().getId());
 
                 ReviewResponseDto response = modelMapper.map(updated, ReviewResponseDto.class);
-                response.setUsername(existingReview.getUser().getUsername());
-                response.setCortometrajeId(existingReview.getCortometraje().getId());
-                response.setCortometrajeTitle(existingReview.getCortometraje().getTitle());
+                response.setUsername(review.getUser().getUsername());
+                response.setCortometrajeId(review.getCortometraje().getId());
+                response.setCortometrajeTitle(review.getCortometraje().getTitle());
 
                 return ResponseEntity.ok(response);
         }
 
         @DeleteMapping("/{id}")
         public ResponseEntity<Void> delete(@PathVariable Long id, Authentication authentication) {
-
-                Review review = reviewService.read(id)
-                                .orElseThrow(() -> new RuntimeException("Reseña no encontrada con ID: " + id));
-
                 User user = userService.findByUsername(authentication.getName())
+                                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+                Review review = reviewService.findByIdIfOwnerOrAdmin(id, user)
                                 .orElseThrow(() -> new RuntimeException(
-                                                "Usuario no encontrado: " + authentication.getName()));
-
-                boolean isAdmin = user.getRoles().stream()
-                                .anyMatch(role -> role.getName().name().equals("ROLE_ADMIN"));
-
-                boolean isOwner = review.getUser().getId().equals(user.getId());
-
-                if (!isAdmin && !isOwner) {
-                        return ResponseEntity.status(403).build();
-                }
+                                                "No tienes permisos para eliminar esta reseña"));
 
                 reviewService.delete(id);
                 reviewService.actualizarRatingCortometraje(review.getCortometraje().getId());

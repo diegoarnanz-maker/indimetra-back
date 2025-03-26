@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import indimetra.modelo.entity.Cortometraje;
+import indimetra.modelo.entity.Role;
+import indimetra.modelo.entity.User;
 import indimetra.modelo.repository.ICortometrajeRepository;
 
 @Service
@@ -56,4 +58,24 @@ public class CortometrajeServiceImplMy8 extends GenericoCRUDServiceImplMy8<Corto
     public void updateRating(Long id, BigDecimal rating) {
         cortometrajeRepository.updateRating(id, rating);
     }
+
+    @Override
+    public Optional<Cortometraje> findByIdIfOwnerOrAdmin(Long id, User usuario) {
+        Optional<Cortometraje> optional = this.read(id);
+
+        if (optional.isPresent()) {
+            Cortometraje cortometraje = optional.get();
+
+            boolean esPropietario = cortometraje.getUser().getId().equals(usuario.getId());
+            boolean esAdmin = usuario.getRoles().stream()
+                    .anyMatch(r -> r.getName().equals(Role.RoleType.ROLE_ADMIN));
+
+            if (esPropietario || esAdmin) {
+                return Optional.of(cortometraje);
+            }
+        }
+
+        return Optional.empty();
+    }
+
 }

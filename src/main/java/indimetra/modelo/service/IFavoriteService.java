@@ -12,6 +12,6 @@ public interface IFavoriteService extends IGenericoCRUD<Favorite, Long> {
 
     // void deleteByUserIdAndSeriesId(Long userId, Long seriesId);
 
-    boolean isFavoriteOwner(Long userId, Long seriesId);
+    boolean isFavoriteOwner(Long userId, Long cortometrajeId);
 
 }

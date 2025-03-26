@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 import indimetra.modelo.entity.Cortometraje;
+import indimetra.modelo.entity.User;
 
 public interface ICortometrajeService extends IGenericoCRUD<Cortometraje, Long> {
 
@@ -21,5 +22,7 @@ public interface ICortometrajeService extends IGenericoCRUD<Cortometraje, Long> 
     Optional<Cortometraje> findByTitle(String title);
 
     List<Cortometraje> findLatestSeries();
+
+    Optional<Cortometraje> findByIdIfOwnerOrAdmin(Long id, User usuario);
 
 }

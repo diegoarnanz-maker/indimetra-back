@@ -12,7 +12,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
-import indimetra.modelo.dto.LoginDto;
+import indimetra.modelo.dto.LoginRequestDto;
+import indimetra.modelo.dto.LoginResponseDto;
 import indimetra.modelo.dto.UserRequestDto;
 import indimetra.modelo.dto.UserResponseDto;
 import indimetra.modelo.entity.User;
@@ -31,17 +32,24 @@ public class AuthRestcontroller {
     private ModelMapper modelMapper;
 
     @PostMapping("/login")
-    public ResponseEntity<Map<String, Object>> login(@RequestBody @Valid LoginDto loginDto) {
+    public ResponseEntity<Map<String, Object>> login(@RequestBody @Valid LoginRequestDto loginDto) {
         User user = userService.authenticateUser(loginDto.getUsername(), loginDto.getPassword());
 
         SecurityContextHolder.getContext().setAuthentication(
                 new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword(), user.getAuthorities()));
 
+        LoginResponseDto response = LoginResponseDto.builder()
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .profileImage(user.getProfileImage())
+                .roles(user.getRoles().stream()
+                        .map(r -> r.getName().name())
+                        .collect(Collectors.toSet()))
+                .build();
+
         return ResponseEntity.ok(Map.of(
-                "message", "Login exitoso",
-                "user", user.getUsername(),
-                "id", user.getId(),
-                "roles", user.getRoles().stream().map(r -> r.getName().name()).collect(Collectors.toSet())));
+                "message", "Usuario logueado correctamente",
+                "user", response));
     }
 
     @PostMapping("/logout")

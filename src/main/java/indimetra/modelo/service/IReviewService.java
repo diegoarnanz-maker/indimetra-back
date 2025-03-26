@@ -1,6 +1,9 @@
 package indimetra.modelo.service;
 
+import java.util.Optional;
+
 import indimetra.modelo.entity.Review;
+import indimetra.modelo.entity.User;
 
 public interface IReviewService extends IGenericoCRUD<Review, Long> {
 
@@ -21,5 +24,7 @@ public interface IReviewService extends IGenericoCRUD<Review, Long> {
     void actualizarRatingCortometraje(Long cortometrajeId);
 
     boolean existsByUserAndCortometraje(Long userId, Long cortometrajeId);
+
+    Optional<Review> findByIdIfOwnerOrAdmin(Long id, User user);
 
 }
