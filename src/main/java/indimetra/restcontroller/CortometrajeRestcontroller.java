@@ -6,12 +6,18 @@ import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+
 import indimetra.modelo.dto.CortometrajeRequestDto;
 import indimetra.modelo.dto.CortometrajeResponseDto;
+import indimetra.modelo.dto.PagedResponse;
 import indimetra.modelo.entity.Category;
 import indimetra.modelo.entity.Cortometraje;
 import indimetra.modelo.entity.Role;
@@ -47,6 +53,29 @@ public class CortometrajeRestcontroller {
                                 .collect(Collectors.toList());
 
                 return ResponseEntity.status(200).body(response);
+        }
+
+        @GetMapping("/paginated")
+        public ResponseEntity<PagedResponse<CortometrajeResponseDto>> findAllPaginated(
+                        @RequestParam(defaultValue = "0") int page,
+                        @RequestParam(defaultValue = "10") int size) {
+
+                Pageable pageable = PageRequest.of(page, size);
+                Page<Cortometraje> pageResult = cortometrajeService.findAll(pageable);
+
+                List<CortometrajeResponseDto> dtoList = pageResult.getContent().stream()
+                                .map(c -> modelMapper.map(c, CortometrajeResponseDto.class))
+                                .collect(Collectors.toList());
+
+                PagedResponse<CortometrajeResponseDto> response = PagedResponse.<CortometrajeResponseDto>builder()
+                                .message("Listado de cortometrajes paginado")
+                                .data(dtoList)
+                                .totalItems((int) pageResult.getTotalElements())
+                                .page(pageResult.getNumber())
+                                .pageSize(pageResult.getSize())
+                                .build();
+
+                return ResponseEntity.ok(response);
         }
 
         @GetMapping("{id}")
