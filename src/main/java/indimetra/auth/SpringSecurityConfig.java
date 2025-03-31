@@ -55,6 +55,7 @@ public class SpringSecurityConfig {
                         // Rutas públicas
                         .requestMatchers(HttpMethod.GET,
                                 "/cortometraje",
+                                "/cortometraje/paginated",
                                 "/cortometraje/{id}")
                         .permitAll()
                         // Rutas ROLE_USER
