@@ -19,6 +19,9 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import indimetra.auth.filter.JwtAuthenticationFilter;
+import indimetra.auth.filter.JwtValidationFilter;
+
 @Configuration
 @EnableWebSecurity
 public class SpringSecurityConfig {
@@ -36,7 +39,10 @@ public class SpringSecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
+
+        AuthenticationManager authManager = authenticationManager(http.getSharedObject(AuthenticationConfiguration.class));
+
+        return http
                 .csrf(csrf -> csrf.disable())
                 .cors(Customizer.withDefaults())
 
@@ -97,10 +103,10 @@ public class SpringSecurityConfig {
                         .anyRequest().authenticated())
 
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .httpBasic(Customizer.withDefaults());
-
-        return http.build();
-    }
+                .addFilter(new JwtAuthenticationFilter(authManager))
+                .addFilter(new JwtValidationFilter(authManager))
+                .build();
+        }
 
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
