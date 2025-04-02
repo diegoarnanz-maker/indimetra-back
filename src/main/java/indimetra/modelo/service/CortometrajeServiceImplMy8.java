@@ -27,33 +27,23 @@ public class CortometrajeServiceImplMy8 extends GenericoCRUDServiceImplMy8<Corto
     }
 
     @Override
-    public Optional<Cortometraje> findByName(String name) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'findByName'");
-    }
-
-    @Override
-    public List<Cortometraje> findByCategory(String category) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'findByCategory'");
+    public List<Cortometraje> findByCategory(String categoryName) {
+        return cortometrajeRepository.findByCategoryNameIgnoreCase(categoryName);
     }
 
     @Override
     public List<Cortometraje> findByRating(Double rating) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'findByRating'");
+        return cortometrajeRepository.findByRatingGreaterThanEqual(BigDecimal.valueOf(rating));
     }
 
     @Override
-    public Optional<Cortometraje> findByTitle(String title) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'findByTitle'");
+    public List<Cortometraje> findByTitleContainingIgnoreCase(String title) {
+        return cortometrajeRepository.findByTitleContainingIgnoreCase(title);
     }
 
     @Override
     public List<Cortometraje> findLatestSeries() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'findLatestSeries'");
+        return cortometrajeRepository.findTop5ByOrderByCreatedAtDesc();
     }
 
     @Override
@@ -83,6 +73,16 @@ public class CortometrajeServiceImplMy8 extends GenericoCRUDServiceImplMy8<Corto
     @Override
     public Page<Cortometraje> findAll(Pageable pageable) {
         return cortometrajeRepository.findAll(pageable);
+    }
+
+    @Override
+    public List<Cortometraje> findTopRated() {
+        return cortometrajeRepository.findTop5ByOrderByRatingDesc();
+    }
+
+    @Override
+    public List<Cortometraje> findByDuracionMenorOIgual(Integer minutos) {
+        return cortometrajeRepository.findByDurationLessThanEqual(minutos);
     }
 
 }
