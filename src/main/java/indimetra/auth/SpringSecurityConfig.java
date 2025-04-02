@@ -47,6 +47,13 @@ public class SpringSecurityConfig {
                 .cors(Customizer.withDefaults())
 
                 .authorizeHttpRequests(authorize -> authorize
+                        // SWAGGER - permitir acceso sin autenticación
+                        .requestMatchers(
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**",
+                                "/swagger-ui.html"
+                        ).permitAll()
+    
                         // AUTHORIZATION
                         .requestMatchers(HttpMethod.POST, "/auth/login", "/auth/register").permitAll()
                         .requestMatchers(HttpMethod.GET, "/auth/me").authenticated()
@@ -55,6 +62,12 @@ public class SpringSecurityConfig {
                         // Rutas públicas
                         .requestMatchers(HttpMethod.GET,
                                 "/cortometraje",
+                                "/cortometraje/buscar/{title}",
+                                "/cortometraje/buscar/categoria/{categoryName}",
+                                "/cortometraje/buscar/latest",
+                                "/cortometraje/buscar/rating-minimo/{valor}",
+                                "/cortometraje/buscar/top5-mejor-valorados",
+                                "/cortometraje/buscar/duracion-maxima/{minutos}",
                                 "/cortometraje/paginated",
                                 "/cortometraje/{id}")
                         .permitAll()

@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.repository.query.Param;
 
 import indimetra.modelo.entity.Cortometraje;
 import indimetra.modelo.entity.User;
@@ -16,16 +17,18 @@ public interface ICortometrajeService extends IGenericoCRUD<Cortometraje, Long> 
 
     void updateRating(Long id, BigDecimal rating);
 
-    Optional<Cortometraje> findByName(String name);
-
     List<Cortometraje> findByCategory(String category);
 
     List<Cortometraje> findByRating(Double rating);
 
-    Optional<Cortometraje> findByTitle(String title);
+    List<Cortometraje> findByTitleContainingIgnoreCase(@Param("title") String title);
 
     List<Cortometraje> findLatestSeries();
 
     Optional<Cortometraje> findByIdIfOwnerOrAdmin(Long id, User usuario);
+
+    List<Cortometraje> findTopRated();
+
+    List<Cortometraje> findByDuracionMenorOIgual(Integer minutos);
 
 }

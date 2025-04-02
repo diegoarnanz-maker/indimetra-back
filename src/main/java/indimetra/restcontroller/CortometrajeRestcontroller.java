@@ -7,10 +7,11 @@ import java.util.stream.Collectors;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -86,6 +87,95 @@ public class CortometrajeRestcontroller {
                 CortometrajeResponseDto response = modelMapper.map(cortometraje, CortometrajeResponseDto.class);
 
                 return ResponseEntity.status(200).body(response);
+        }
+
+        @GetMapping("/buscar/{title}")
+        public ResponseEntity<List<CortometrajeResponseDto>> buscarPorNombre(@PathVariable String title) {
+                List<Cortometraje> cortometrajes = cortometrajeService.findByTitleContainingIgnoreCase(title);
+
+                if (cortometrajes.isEmpty()) {
+                        throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                        "No se encontraron cortometrajes que coincidan con: " + title);
+                }
+
+                List<CortometrajeResponseDto> responseList = cortometrajes.stream()
+                                .map(c -> modelMapper.map(c, CortometrajeResponseDto.class))
+                                .toList();
+
+                return ResponseEntity.ok(responseList);
+        }
+
+        @GetMapping("/buscar/categoria/{categoryName}")
+        public ResponseEntity<List<CortometrajeResponseDto>> buscarPorCategoria(@PathVariable String categoryName) {
+                List<Cortometraje> cortos = cortometrajeService.findByCategory(categoryName);
+
+                if (cortos.isEmpty()) {
+                        throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                        "No se encontraron cortometrajes en la categoría: " + categoryName);
+                }
+
+                List<CortometrajeResponseDto> response = cortos.stream()
+                                .map(c -> modelMapper.map(c, CortometrajeResponseDto.class))
+                                .toList();
+
+                return ResponseEntity.ok(response);
+        }
+
+        @GetMapping("/buscar/latest")
+        public ResponseEntity<List<CortometrajeResponseDto>> obtenerTop5Nuevos() {
+                List<Cortometraje> cortos = cortometrajeService.findLatestSeries();
+
+                List<CortometrajeResponseDto> response = cortos.stream()
+                                .map(c -> modelMapper.map(c, CortometrajeResponseDto.class))
+                                .toList();
+
+                return ResponseEntity.ok(response);
+        }
+
+        // {{Valor}} solo numeros enteros
+        @GetMapping("/buscar/rating-minimo/{valor}")
+        public ResponseEntity<List<CortometrajeResponseDto>> obtenerCortometrajesConRatingMinimo(
+                        @PathVariable Double valor) {
+                List<Cortometraje> cortos = cortometrajeService.findByRating(valor);
+
+                if (cortos.isEmpty()) {
+                        throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                        "No se encontraron cortometrajes con rating >= " + valor);
+                }
+
+                List<CortometrajeResponseDto> response = cortos.stream()
+                                .map(c -> modelMapper.map(c, CortometrajeResponseDto.class))
+                                .toList();
+
+                return ResponseEntity.ok(response);
+        }
+
+        @GetMapping("/buscar/top5-mejor-valorados")
+        public ResponseEntity<List<CortometrajeResponseDto>> obtenerTop5MejorValorados() {
+                List<Cortometraje> top = cortometrajeService.findTopRated();
+
+                List<CortometrajeResponseDto> response = top.stream()
+                                .map(c -> modelMapper.map(c, CortometrajeResponseDto.class))
+                                .toList();
+
+                return ResponseEntity.ok(response);
+        }
+
+        @GetMapping("/buscar/duracion-maxima/{minutos}")
+        public ResponseEntity<List<CortometrajeResponseDto>> buscarPorDuracionMaxima(@PathVariable Integer minutos) {
+                List<Cortometraje> cortos = cortometrajeService.findByDuracionMenorOIgual(minutos);
+
+                if (cortos.isEmpty()) {
+                        throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                        "No se encontraron cortometrajes con duración menor o igual a " + minutos
+                                                        + " minutos");
+                }
+
+                List<CortometrajeResponseDto> response = cortos.stream()
+                                .map(c -> modelMapper.map(c, CortometrajeResponseDto.class))
+                                .toList();
+
+                return ResponseEntity.ok(response);
         }
 
         @PostMapping
