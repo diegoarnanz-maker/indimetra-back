@@ -1,27 +1,22 @@
 package indimetra.modelo.entity;
 
-import java.io.Serializable;
-import java.util.Date;
-
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.Date;
+
+import indimetra.modelo.entity.base.BaseEntity;
+
 @Entity
 @Table(name = "favorites", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"user_id", "cortometraje_id"})
+        @UniqueConstraint(columnNames = { "user_id", "cortometraje_id" })
 })
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Favorite implements Serializable {
-
-    private static final long serialVersionUID = 1L;
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class Favorite extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)

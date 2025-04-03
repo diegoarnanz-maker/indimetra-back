@@ -1,9 +1,9 @@
 package indimetra.modelo.entity;
 
-import java.io.Serializable;
-
 import jakarta.persistence.*;
 import lombok.*;
+
+import indimetra.modelo.entity.base.BaseEntity;
 
 @Entity
 @Table(name = "roles")
@@ -12,13 +12,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Role implements Serializable {
-
-    private static final long serialVersionUID = 1L;
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class Role extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, unique = true)
@@ -31,5 +25,4 @@ public class Role implements Serializable {
     public enum RoleType {
         ROLE_ADMIN, ROLE_USER
     }
-
 }

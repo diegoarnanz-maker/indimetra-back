@@ -1,17 +1,17 @@
 package indimetra.modelo.entity;
 
-import java.io.Serializable;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
-
+import jakarta.persistence.*;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import jakarta.persistence.*;
-import lombok.*;
+import indimetra.modelo.entity.base.BaseEntity;
+
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "users")
@@ -20,13 +20,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class User implements Serializable, UserDetails {
-
-    private static final long serialVersionUID = 1L;
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class User extends BaseEntity implements UserDetails {
 
     @Column(nullable = false, unique = true, length = 50)
     private String username;
@@ -72,5 +66,4 @@ public class User implements Serializable, UserDetails {
                 .map(r -> new SimpleGrantedAuthority(r.getName().name()))
                 .toList();
     }
-
 }
