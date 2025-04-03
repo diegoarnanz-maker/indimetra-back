@@ -22,13 +22,13 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import indimetra.modelo.dto.LoginRequestDto;
-import indimetra.modelo.dto.UserRequestDto;
-import indimetra.modelo.dto.UserResponseDto;
 import indimetra.modelo.entity.Role;
 import indimetra.modelo.entity.User;
-import indimetra.modelo.service.IRoleService;
-import indimetra.modelo.service.IUserService;
+import indimetra.modelo.service.Auth.Model.LoginRequestDto;
+import indimetra.modelo.service.Role.IRoleService;
+import indimetra.modelo.service.User.IUserService;
+import indimetra.modelo.service.User.Model.UserRequestDto;
+import indimetra.modelo.service.User.Model.UserResponseDto;
 import jakarta.transaction.Transactional;
 import indimetra.exception.GlobalExceptionHandler;
 import org.springframework.security.crypto.password.PasswordEncoder;

@@ -17,14 +17,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import indimetra.modelo.dto.ReviewRequestDto;
-import indimetra.modelo.dto.ReviewResponseDto;
 import indimetra.modelo.entity.Cortometraje;
 import indimetra.modelo.entity.Review;
 import indimetra.modelo.entity.User;
-import indimetra.modelo.service.ICortometrajeService;
-import indimetra.modelo.service.IReviewService;
-import indimetra.modelo.service.IUserService;
+import indimetra.modelo.service.Cortometraje.ICortometrajeService;
+import indimetra.modelo.service.Review.IReviewService;
+import indimetra.modelo.service.Review.Model.ReviewRequestDto;
+import indimetra.modelo.service.Review.Model.ReviewResponseDto;
+import indimetra.modelo.service.User.IUserService;
 import jakarta.validation.Valid;
 
 @RestController

@@ -9,13 +9,13 @@ import org.modelmapper.PropertyMap;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import indimetra.modelo.dto.CortometrajeResponseDto;
-import indimetra.modelo.dto.ReviewResponseDto;
-import indimetra.modelo.dto.UserResponseDto;
 import indimetra.modelo.entity.Cortometraje;
 import indimetra.modelo.entity.Review;
 import indimetra.modelo.entity.Role;
 import indimetra.modelo.entity.User;
+import indimetra.modelo.service.Cortometraje.Model.CortometrajeResponseDto;
+import indimetra.modelo.service.Review.Model.ReviewResponseDto;
+import indimetra.modelo.service.User.Model.UserResponseDto;
 
 @Configuration
 public class ModelMapperConfig {
