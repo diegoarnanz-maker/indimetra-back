@@ -16,10 +16,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import indimetra.modelo.dto.CategoryRequestDto;
-import indimetra.modelo.dto.CategoryResponseDto;
 import indimetra.modelo.entity.Category;
-import indimetra.modelo.service.ICategoryService;
+import indimetra.modelo.service.Category.ICategoryService;
+import indimetra.modelo.service.Category.Model.CategoryRequestDto;
+import indimetra.modelo.service.Category.Model.CategoryResponseDto;
 import jakarta.validation.Valid;
 
 @RestController

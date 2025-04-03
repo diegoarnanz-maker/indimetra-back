@@ -12,12 +12,12 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
-import indimetra.modelo.dto.LoginRequestDto;
-import indimetra.modelo.dto.LoginResponseDto;
-import indimetra.modelo.dto.UserRequestDto;
-import indimetra.modelo.dto.UserResponseDto;
 import indimetra.modelo.entity.User;
-import indimetra.modelo.service.IUserService;
+import indimetra.modelo.service.Auth.Model.LoginRequestDto;
+import indimetra.modelo.service.Auth.Model.LoginResponseDto;
+import indimetra.modelo.service.User.IUserService;
+import indimetra.modelo.service.User.Model.UserRequestDto;
+import indimetra.modelo.service.User.Model.UserResponseDto;
 import jakarta.validation.Valid;
 
 @RestController

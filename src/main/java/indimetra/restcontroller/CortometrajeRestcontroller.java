@@ -16,16 +16,16 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
-import indimetra.modelo.dto.CortometrajeRequestDto;
-import indimetra.modelo.dto.CortometrajeResponseDto;
-import indimetra.modelo.dto.PagedResponse;
 import indimetra.modelo.entity.Category;
 import indimetra.modelo.entity.Cortometraje;
 import indimetra.modelo.entity.Role;
 import indimetra.modelo.entity.User;
-import indimetra.modelo.service.ICategoryService;
-import indimetra.modelo.service.ICortometrajeService;
-import indimetra.modelo.service.IUserService;
+import indimetra.modelo.service.Category.ICategoryService;
+import indimetra.modelo.service.Cortometraje.ICortometrajeService;
+import indimetra.modelo.service.Cortometraje.Model.CortometrajeRequestDto;
+import indimetra.modelo.service.Cortometraje.Model.CortometrajeResponseDto;
+import indimetra.modelo.service.Shared.Model.PagedResponse;
+import indimetra.modelo.service.User.IUserService;
 import jakarta.validation.Valid;
 
 @RestController

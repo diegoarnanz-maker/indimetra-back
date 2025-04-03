@@ -10,13 +10,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import indimetra.modelo.dto.FavoriteRequestDto;
-import indimetra.modelo.dto.FavoriteResponseDto;
 import indimetra.modelo.entity.Cortometraje;
 import indimetra.modelo.entity.Favorite;
 import indimetra.modelo.entity.User;
 import indimetra.modelo.service.*;
-
+import indimetra.modelo.service.Cortometraje.ICortometrajeService;
+import indimetra.modelo.service.Favorite.IFavoriteService;
+import indimetra.modelo.service.Favorite.Model.FavoriteRequestDto;
+import indimetra.modelo.service.Favorite.Model.FavoriteResponseDto;
+import indimetra.modelo.service.User.IUserService;
 import jakarta.validation.Valid;
 
 @RestController
