@@ -1,7 +1,6 @@
 package indimetra.modelo.entity;
 
-import java.io.Serializable;
-
+import indimetra.modelo.entity.base.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -12,18 +11,11 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Category implements Serializable {
-
-    private static final long serialVersionUID = 1L;
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class Category extends BaseEntity {
 
     @Column(nullable = false, unique = true, length = 50)
     private String name;
 
     @Column(columnDefinition = "TEXT")
     private String description;
-
 }

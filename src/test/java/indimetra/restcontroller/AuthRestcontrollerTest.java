@@ -72,13 +72,13 @@ public class AuthRestcontrollerTest {
         userRole.setName(Role.RoleType.ROLE_USER);
 
         // Creación del usuario mock
-        mockUser = User.builder()
-                .id(1L)
-                .username("testuser")
-                .email("test@example.com")
-                .password("encodedpassword")
-                .roles(Collections.singleton(userRole))
-                .build();
+        // mockUser = User.builder()
+        //         .id(1L)
+        //         .username("testuser")
+        //         .email("test@example.com")
+        //         .password("encodedpassword")
+        //         .roles(Collections.singleton(userRole))
+        //         .build();
 
         // Simulación del DTO recibido en la solicitud de registro
         userRequestDto = UserRequestDto.builder()

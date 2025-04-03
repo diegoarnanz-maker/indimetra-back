@@ -1,11 +1,12 @@
 package indimetra.modelo.entity;
 
-import java.io.Serializable;
+import jakarta.persistence.*;
+import lombok.*;
+
 import java.math.BigDecimal;
 import java.util.Date;
 
-import jakarta.persistence.*;
-import lombok.*;
+import indimetra.modelo.entity.base.BaseEntity;
 
 @Entity
 @Table(name = "cortometrajes")
@@ -14,13 +15,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Cortometraje implements Serializable {
-
-    private static final long serialVersionUID = 1L;
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class Cortometraje extends BaseEntity {
 
     @Column(nullable = false, length = 255)
     private String title;
