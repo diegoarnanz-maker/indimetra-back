@@ -1,21 +1,17 @@
 package indimetra.restcontroller;
 
 import java.util.Map;
-import java.util.stream.Collectors;
 
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
-import indimetra.modelo.entity.User;
+import indimetra.modelo.service.Auth.IAuthService;
 import indimetra.modelo.service.Auth.Model.LoginRequestDto;
 import indimetra.modelo.service.Auth.Model.LoginResponseDto;
-import indimetra.modelo.service.User.IUserService;
 import indimetra.modelo.service.User.Model.UserRequestDto;
 import indimetra.modelo.service.User.Model.UserResponseDto;
 import jakarta.validation.Valid;
@@ -26,26 +22,18 @@ import jakarta.validation.Valid;
 public class AuthRestcontroller {
 
     @Autowired
-    private IUserService userService;
-
-    @Autowired
-    private ModelMapper modelMapper;
+    private IAuthService authService;
 
     @PostMapping("/login")
     public ResponseEntity<Map<String, Object>> login(@RequestBody @Valid LoginRequestDto loginDto) {
-        User user = userService.authenticateUser(loginDto.getUsername(), loginDto.getPassword());
+        LoginResponseDto response = authService.authenticateUser(loginDto);
 
         SecurityContextHolder.getContext().setAuthentication(
-                new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword(), user.getAuthorities()));
-
-        LoginResponseDto response = LoginResponseDto.builder()
-                .username(user.getUsername())
-                .email(user.getEmail())
-                .profileImage(user.getProfileImage())
-                .roles(user.getRoles().stream()
-                        .map(r -> r.getName().name())
-                        .collect(Collectors.toSet()))
-                .build();
+                new UsernamePasswordAuthenticationToken(
+                        response.getUsername(), null, response.getRoles().stream()
+                                .map(role -> new org.springframework.security.core.authority.SimpleGrantedAuthority(
+                                        role))
+                                .toList()));
 
         return ResponseEntity.ok(Map.of(
                 "message", "Usuario logueado correctamente",
@@ -60,15 +48,13 @@ public class AuthRestcontroller {
 
     @PostMapping("/register")
     public ResponseEntity<UserResponseDto> registerUser(@RequestBody @Valid UserRequestDto userDto) {
-        User newUser = userService.registerUser(userDto);
-        return ResponseEntity.status(201).body(modelMapper.map(newUser, UserResponseDto.class));
+        UserResponseDto newUser = authService.registerUser(userDto);
+        return ResponseEntity.status(201).body(newUser);
     }
 
     @GetMapping("/me")
     public ResponseEntity<UserResponseDto> getAuthenticatedUser(Authentication authentication) {
-        User user = userService.findByUsername(authentication.getName())
-                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + authentication.getName()));
-
-        return ResponseEntity.ok(modelMapper.map(user, UserResponseDto.class));
+        UserResponseDto user = authService.getAuthenticatedUser(authentication.getName());
+        return ResponseEntity.ok(user);
     }
 }
