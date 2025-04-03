@@ -4,9 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
-import java.util.Date;
 
-import indimetra.modelo.entity.base.BaseEntity;
+import indimetra.modelo.entity.base.BaseEntityCreated;
 
 @Entity
 @Table(name = "reviews")
@@ -15,7 +14,7 @@ import indimetra.modelo.entity.base.BaseEntity;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Review extends BaseEntity {
+public class Review extends BaseEntityCreated {
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
@@ -30,15 +29,4 @@ public class Review extends BaseEntity {
 
     @Column(columnDefinition = "TEXT")
     private String comment;
-
-    @Column(name = "created_at", updatable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date createdAt;
-
-    @PrePersist
-    protected void onCreate() {
-        if (this.createdAt == null) {
-            this.createdAt = new Date();
-        }
-    }
 }

@@ -6,10 +6,9 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import indimetra.modelo.entity.base.BaseEntity;
+import indimetra.modelo.entity.base.BaseEntityCreated;
 
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -20,7 +19,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class User extends BaseEntity implements UserDetails {
+public class User extends BaseEntityCreated implements UserDetails {
 
     @Column(nullable = false, unique = true, length = 50)
     private String username;
@@ -44,21 +43,10 @@ public class User extends BaseEntity implements UserDetails {
     @Column(nullable = false, length = 50)
     private String country;
 
-    @Column(name = "created_at", updatable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date createdAt;
-
     @Builder.Default
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles = new HashSet<>();
-
-    @PrePersist
-    protected void onCreate() {
-        if (this.createdAt == null) {
-            this.createdAt = new Date();
-        }
-    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

@@ -4,9 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
-import java.util.Date;
 
-import indimetra.modelo.entity.base.BaseEntity;
+import indimetra.modelo.entity.base.BaseEntityCreated;
 
 @Entity
 @Table(name = "cortometrajes")
@@ -15,7 +14,7 @@ import indimetra.modelo.entity.base.BaseEntity;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Cortometraje extends BaseEntity {
+public class Cortometraje extends BaseEntityCreated {
 
     @Column(nullable = false, length = 255)
     private String title;
@@ -52,15 +51,10 @@ public class Cortometraje extends BaseEntity {
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 
-    @Column(name = "created_at", updatable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date createdAt;
-
     @PrePersist
     protected void onCreate() {
         if (this.language == null) {
             this.language = "Spanish";
         }
-        this.createdAt = new Date();
     }
 }
