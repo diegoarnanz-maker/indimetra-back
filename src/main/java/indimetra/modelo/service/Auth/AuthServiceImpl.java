@@ -7,8 +7,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import indimetra.exception.BadRequestException;
+import indimetra.exception.ConflictException;
+import indimetra.exception.NotFoundException;
 import indimetra.modelo.entity.Role;
 import indimetra.modelo.entity.User;
+import indimetra.modelo.helpers.Validators;
 import indimetra.modelo.repository.IUserRepository;
 import indimetra.modelo.repository.IRoleRepository;
 import indimetra.modelo.service.Auth.Model.LoginRequestDto;
@@ -16,8 +20,6 @@ import indimetra.modelo.service.Auth.Model.LoginResponseDto;
 import indimetra.modelo.service.User.Model.UserRequestDto;
 import indimetra.modelo.service.User.Model.UserResponseDto;
 
-import jakarta.persistence.EntityExistsException;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 
 @Service
@@ -38,10 +40,10 @@ public class AuthServiceImpl implements IAuthService {
     @Override
     public LoginResponseDto authenticateUser(LoginRequestDto loginDto) {
         User user = userRepository.findByUsername(loginDto.getUsername())
-                .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado"));
+                .orElseThrow(() -> new NotFoundException("Usuario no encontrado"));
 
         if (!passwordEncoder.matches(loginDto.getPassword(), user.getPassword())) {
-            throw new IllegalArgumentException("Credenciales inválidas");
+            throw new BadRequestException("Credenciales inválidas");
         }
 
         return modelMapper.map(user, LoginResponseDto.class);
@@ -50,16 +52,20 @@ public class AuthServiceImpl implements IAuthService {
     @Override
     @Transactional
     public UserResponseDto registerUser(UserRequestDto userDto) {
+        if (!Validators.isValidEmail(userDto.getEmail())) {
+            throw new BadRequestException("El formato del correo no es válido");
+        }
+
         if (userRepository.findByUsername(userDto.getUsername()).isPresent()) {
-            throw new EntityExistsException("El nombre de usuario ya está en uso");
+            throw new ConflictException("El nombre de usuario ya está en uso");
         }
 
         if (userRepository.findByEmail(userDto.getEmail()).isPresent()) {
-            throw new EntityExistsException("El correo ya está en uso");
+            throw new ConflictException("El correo ya está en uso");
         }
 
         Role userRole = roleRepository.findByName(Role.RoleType.ROLE_USER)
-                .orElseThrow(() -> new EntityNotFoundException("Rol ROLE_USER no encontrado"));
+                .orElseThrow(() -> new NotFoundException("Rol ROLE_USER no encontrado"));
 
         User user = User.builder()
                 .username(userDto.getUsername())
@@ -77,8 +83,9 @@ public class AuthServiceImpl implements IAuthService {
     @Override
     public UserResponseDto getAuthenticatedUser(String username) {
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado: " + username));
+                .orElseThrow(() -> new NotFoundException("Usuario no encontrado: " + username));
 
         return modelMapper.map(user, UserResponseDto.class);
     }
+
 }

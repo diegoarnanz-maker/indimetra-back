@@ -9,6 +9,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import indimetra.exception.BadRequestException;
+import indimetra.exception.ForbiddenException;
+import indimetra.exception.NotFoundException;
 import indimetra.modelo.entity.Cortometraje;
 import indimetra.modelo.entity.Role;
 import indimetra.modelo.entity.User;
@@ -34,6 +37,10 @@ public class CortometrajeServiceImplMy8 extends GenericoCRUDServiceImplMy8<Corto
 
     @Override
     public List<Cortometraje> findByRating(Double rating) {
+        if (rating == null || rating < 0) {
+            throw new BadRequestException("El rating debe ser mayor o igual que 0");
+        }
+
         return cortometrajeRepository.findByRatingGreaterThanEqual(BigDecimal.valueOf(rating));
     }
 
@@ -54,21 +61,18 @@ public class CortometrajeServiceImplMy8 extends GenericoCRUDServiceImplMy8<Corto
 
     @Override
     public Optional<Cortometraje> findByIdIfOwnerOrAdmin(Long id, User usuario) {
-        Optional<Cortometraje> optional = this.read(id);
+        Cortometraje cortometraje = this.read(id)
+                .orElseThrow(() -> new NotFoundException("Cortometraje no encontrado"));
 
-        if (optional.isPresent()) {
-            Cortometraje cortometraje = optional.get();
+        boolean esPropietario = cortometraje.getUser().getId().equals(usuario.getId());
+        boolean esAdmin = usuario.getRoles().stream()
+                .anyMatch(r -> r.getName().equals(Role.RoleType.ROLE_ADMIN));
 
-            boolean esPropietario = cortometraje.getUser().getId().equals(usuario.getId());
-            boolean esAdmin = usuario.getRoles().stream()
-                    .anyMatch(r -> r.getName().equals(Role.RoleType.ROLE_ADMIN));
-
-            if (esPropietario || esAdmin) {
-                return Optional.of(cortometraje);
-            }
+        if (esPropietario || esAdmin) {
+            return Optional.of(cortometraje);
         }
 
-        return Optional.empty();
+        throw new ForbiddenException("No tienes permisos para acceder a este cortometraje");
     }
 
     @Override
@@ -83,6 +87,10 @@ public class CortometrajeServiceImplMy8 extends GenericoCRUDServiceImplMy8<Corto
 
     @Override
     public List<Cortometraje> findByDuracionMenorOIgual(Integer minutos) {
+        if (minutos == null || minutos <= 0) {
+            throw new BadRequestException("La duración debe ser mayor que 0");
+        }
+
         return cortometrajeRepository.findByDurationLessThanEqual(minutos);
     }
 

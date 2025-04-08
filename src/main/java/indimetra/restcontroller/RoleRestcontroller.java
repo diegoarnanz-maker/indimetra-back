@@ -1,5 +1,7 @@
 package indimetra.restcontroller;
 
-public class RoleRestcontroller {
+import indimetra.restcontroller.base.BaseRestcontroller;
+
+public class RoleRestcontroller extends BaseRestcontroller {
 
 }
