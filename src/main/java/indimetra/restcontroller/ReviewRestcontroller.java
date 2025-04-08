@@ -1,22 +1,16 @@
 package indimetra.restcontroller;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import indimetra.exception.BadRequestException;
+import indimetra.exception.ForbiddenException;
+import indimetra.exception.NotFoundException;
 import indimetra.modelo.entity.Cortometraje;
 import indimetra.modelo.entity.Review;
 import indimetra.modelo.entity.User;
@@ -25,12 +19,14 @@ import indimetra.modelo.service.Review.IReviewService;
 import indimetra.modelo.service.Review.Model.ReviewRequestDto;
 import indimetra.modelo.service.Review.Model.ReviewResponseDto;
 import indimetra.modelo.service.User.IUserService;
+import indimetra.restcontroller.base.BaseRestcontroller;
+import indimetra.utils.ApiResponse;
 import jakarta.validation.Valid;
 
 @RestController
 @CrossOrigin(origins = "*")
 @RequestMapping("/review")
-public class ReviewRestcontroller {
+public class ReviewRestcontroller extends BaseRestcontroller {
 
         @Autowired
         private IReviewService reviewService;
@@ -45,50 +41,43 @@ public class ReviewRestcontroller {
         private ModelMapper modelMapper;
 
         @GetMapping
-        public ResponseEntity<List<ReviewResponseDto>> findAll() {
-                List<Review> reviews = reviewService.findAll();
-
-                List<ReviewResponseDto> response = reviews.stream()
+        public ResponseEntity<ApiResponse<List<ReviewResponseDto>>> findAll() {
+                List<ReviewResponseDto> response = reviewService.findAll().stream()
                                 .map(review -> modelMapper.map(review, ReviewResponseDto.class))
-                                .collect(Collectors.toList());
+                                .toList();
 
-                return ResponseEntity.status(200).body(response);
+                return success(response, "Listado de reseñas");
         }
 
         @GetMapping("/{id}")
-        public ResponseEntity<ReviewResponseDto> findById(@PathVariable Long id) {
+        public ResponseEntity<ApiResponse<ReviewResponseDto>> findById(@PathVariable Long id) {
                 Review review = reviewService.read(id)
-                                .orElseThrow(() -> new RuntimeException("Review no encontrada"));
+                                .orElseThrow(() -> new NotFoundException("Reseña no encontrada"));
 
                 ReviewResponseDto response = modelMapper.map(review, ReviewResponseDto.class);
-
-                return ResponseEntity.status(200).body(response);
+                return success(response, "Detalle de la reseña");
         }
 
         @PostMapping
-        public ResponseEntity<ReviewResponseDto> create(
+        public ResponseEntity<ApiResponse<ReviewResponseDto>> create(
                         @RequestBody @Valid ReviewRequestDto dto,
                         Authentication authentication) {
 
                 User user = userService.findByUsername(authentication.getName())
-                                .orElseThrow(() -> new RuntimeException(
-                                                "Usuario no encontrado: " + authentication.getName()));
+                                .orElseThrow(() -> new NotFoundException("Usuario no encontrado"));
 
                 Cortometraje cortometraje = cortometrajeService.read(dto.getCortometrajeId())
-                                .orElseThrow(() -> new RuntimeException(
-                                                "Cortometraje no encontrado con ID: " + dto.getCortometrajeId()));
+                                .orElseThrow(() -> new NotFoundException("Cortometraje no encontrado"));
 
                 if (reviewService.existsByUserAndCortometraje(user.getId(), cortometraje.getId())) {
-                        throw new RuntimeException("Ya has realizado una reseña para este cortometraje.");
+                        throw new BadRequestException("Ya has realizado una reseña para este cortometraje");
                 }
 
                 Review review = modelMapper.map(dto, Review.class);
                 review.setUser(user);
                 review.setCortometraje(cortometraje);
-                review.setId(null);
 
                 Review saved = reviewService.create(review);
-
                 reviewService.actualizarRatingCortometraje(cortometraje.getId());
 
                 ReviewResponseDto response = modelMapper.map(saved, ReviewResponseDto.class);
@@ -96,49 +85,48 @@ public class ReviewRestcontroller {
                 response.setCortometrajeId(cortometraje.getId());
                 response.setCortometrajeTitle(cortometraje.getTitle());
 
-                return ResponseEntity.status(201).body(response);
+                return created(response, "Reseña creada correctamente");
         }
 
         @PutMapping("/{id}")
-        public ResponseEntity<ReviewResponseDto> update(
+        public ResponseEntity<ApiResponse<ReviewResponseDto>> update(
                         @PathVariable Long id,
                         @RequestBody @Valid ReviewRequestDto dto,
                         Authentication authentication) {
 
                 User user = userService.findByUsername(authentication.getName())
-                                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                                .orElseThrow(() -> new NotFoundException("Usuario no encontrado"));
 
                 Review review = reviewService.findByIdIfOwnerOrAdmin(id, user)
-                                .orElseThrow(() -> new RuntimeException(
+                                .orElseThrow(() -> new ForbiddenException(
                                                 "No tienes permisos para modificar esta reseña"));
 
                 review.setRating(dto.getRating());
                 review.setComment(dto.getComment());
 
                 Review updated = reviewService.update(review);
-                reviewService.actualizarRatingCortometraje(review.getCortometraje().getId());
+                reviewService.actualizarRatingCortometraje(updated.getCortometraje().getId());
 
                 ReviewResponseDto response = modelMapper.map(updated, ReviewResponseDto.class);
-                response.setUsername(review.getUser().getUsername());
-                response.setCortometrajeId(review.getCortometraje().getId());
-                response.setCortometrajeTitle(review.getCortometraje().getTitle());
+                response.setUsername(updated.getUser().getUsername());
+                response.setCortometrajeId(updated.getCortometraje().getId());
+                response.setCortometrajeTitle(updated.getCortometraje().getTitle());
 
-                return ResponseEntity.ok(response);
+                return success(response, "Reseña actualizada correctamente");
         }
 
         @DeleteMapping("/{id}")
-        public ResponseEntity<Void> delete(@PathVariable Long id, Authentication authentication) {
+        public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id, Authentication authentication) {
                 User user = userService.findByUsername(authentication.getName())
-                                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                                .orElseThrow(() -> new NotFoundException("Usuario no encontrado"));
 
                 Review review = reviewService.findByIdIfOwnerOrAdmin(id, user)
-                                .orElseThrow(() -> new RuntimeException(
+                                .orElseThrow(() -> new ForbiddenException(
                                                 "No tienes permisos para eliminar esta reseña"));
 
                 reviewService.delete(id);
                 reviewService.actualizarRatingCortometraje(review.getCortometraje().getId());
 
-                return ResponseEntity.noContent().build();
+                return success(null, "Reseña eliminada correctamente");
         }
-
 }

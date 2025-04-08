@@ -1,22 +1,18 @@
 package indimetra.modelo.service.User;
 
 import java.util.Optional;
-import java.util.Set;
 
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import indimetra.modelo.entity.Role;
+import indimetra.exception.BadRequestException;
+import indimetra.exception.NotFoundException;
 import indimetra.modelo.entity.User;
 import indimetra.modelo.repository.IUserRepository;
 import indimetra.modelo.service.Base.GenericoCRUDServiceImplMy8;
-import indimetra.modelo.service.Role.IRoleService;
-import indimetra.modelo.service.User.Model.UserRequestDto;
 import jakarta.transaction.Transactional;
 
 @Service
@@ -26,15 +22,6 @@ public class UserServiceImplMy8 extends GenericoCRUDServiceImplMy8<User, Long>
     @Autowired
     private IUserRepository userRepository;
 
-    @Autowired
-    private IRoleService roleService;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private ModelMapper modelMapper;
-
     @Override
     protected IUserRepository getRepository() {
         return userRepository;
@@ -42,11 +29,17 @@ public class UserServiceImplMy8 extends GenericoCRUDServiceImplMy8<User, Long>
 
     @Override
     public Optional<User> findByUsername(String username) {
+        if (username == null || username.trim().isEmpty()) {
+            throw new BadRequestException("El nombre de usuario no puede estar vacío");
+        }
         return userRepository.findByUsername(username);
     }
 
     @Override
     public Optional<User> findByEmail(String email) {
+        if (email == null || email.trim().isEmpty()) {
+            throw new BadRequestException("El correo electrónico no puede estar vacío");
+        }
         return userRepository.findByEmail(email);
     }
 
@@ -62,44 +55,16 @@ public class UserServiceImplMy8 extends GenericoCRUDServiceImplMy8<User, Long>
     }
 
     @Override
-    public User authenticateUser(String username, String password) {
-        User user = findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + username));
-
-        if (!passwordEncoder.matches(password, user.getPassword())) {
-            throw new RuntimeException("Credenciales incorrectas");
-        }
-
-        return user;
-    }
-
-    @Override
-    public User registerUser(UserRequestDto userDto) {
-        if (findByUsername(userDto.getUsername()).isPresent()) {
-            throw new RuntimeException("El nombre de usuario ya está en uso");
-        }
-        if (findByEmail(userDto.getEmail()).isPresent()) {
-            throw new RuntimeException("El email ya está en uso");
-        }
-
-        Role userRole = roleService.findByName("ROLE_USER")
-                .orElseThrow(() -> new RuntimeException("Error: Rol no encontrado"));
-
-        User user = modelMapper.map(userDto, User.class);
-        user.setPassword(passwordEncoder.encode(userDto.getPassword()));
-        user.setRoles(Set.of(userRole));
-
-        return userRepository.save(user);
-    }
-
-    @Override
     @Transactional
     public void updateAuthorStatus(Long userId, boolean isAuthor) {
+        if (userId == null || userId <= 0) {
+            throw new BadRequestException("ID de usuario inválido");
+        }
+
         User existingUser = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new NotFoundException("Usuario no encontrado con ID: " + userId));
 
         existingUser.setIsAuthor(isAuthor);
         userRepository.save(existingUser);
     }
-
 }
