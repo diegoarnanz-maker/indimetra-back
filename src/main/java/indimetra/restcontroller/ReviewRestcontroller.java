@@ -58,35 +58,35 @@ public class ReviewRestcontroller extends BaseRestcontroller {
                 return success(response, "Detalle de la reseña");
         }
 
-        @PostMapping
-        public ResponseEntity<ApiResponse<ReviewResponseDto>> create(
-                        @RequestBody @Valid ReviewRequestDto dto,
-                        Authentication authentication) {
+        // @PostMapping
+        // public ResponseEntity<ApiResponse<ReviewResponseDto>> create(
+        //                 @RequestBody @Valid ReviewRequestDto dto,
+        //                 Authentication authentication) {
 
-                User user = userService.findByUsername(authentication.getName())
-                                .orElseThrow(() -> new NotFoundException("Usuario no encontrado"));
+        //         User user = userService.findByUsername(authentication.getName())
+        //                         .orElseThrow(() -> new NotFoundException("Usuario no encontrado"));
 
-                Cortometraje cortometraje = cortometrajeService.read(dto.getCortometrajeId())
-                                .orElseThrow(() -> new NotFoundException("Cortometraje no encontrado"));
+        //         Cortometraje cortometraje = cortometrajeService.read(dto.getCortometrajeId())
+        //                         .orElseThrow(() -> new NotFoundException("Cortometraje no encontrado"));
 
-                if (reviewService.existsByUserAndCortometraje(user.getId(), cortometraje.getId())) {
-                        throw new BadRequestException("Ya has realizado una reseña para este cortometraje");
-                }
+        //         if (reviewService.existsByUserAndCortometraje(user.getId(), cortometraje.getId())) {
+        //                 throw new BadRequestException("Ya has realizado una reseña para este cortometraje");
+        //         }
 
-                Review review = modelMapper.map(dto, Review.class);
-                review.setUser(user);
-                review.setCortometraje(cortometraje);
+        //         Review review = modelMapper.map(dto, Review.class);
+        //         review.setUser(user);
+        //         review.setCortometraje(cortometraje);
 
-                Review saved = reviewService.create(review);
-                reviewService.actualizarRatingCortometraje(cortometraje.getId());
+        //         Review saved = reviewService.create(review);
+        //         reviewService.actualizarRatingCortometraje(cortometraje.getId());
 
-                ReviewResponseDto response = modelMapper.map(saved, ReviewResponseDto.class);
-                response.setUsername(user.getUsername());
-                response.setCortometrajeId(cortometraje.getId());
-                response.setCortometrajeTitle(cortometraje.getTitle());
+        //         ReviewResponseDto response = modelMapper.map(saved, ReviewResponseDto.class);
+        //         response.setUsername(user.getUsername());
+        //         response.setCortometrajeId(cortometraje.getId());
+        //         response.setCortometrajeTitle(cortometraje.getTitle());
 
-                return created(response, "Reseña creada correctamente");
-        }
+        //         return created(response, "Reseña creada correctamente");
+        // }
 
         @PutMapping("/{id}")
         public ResponseEntity<ApiResponse<ReviewResponseDto>> update(

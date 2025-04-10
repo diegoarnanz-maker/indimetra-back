@@ -14,4 +14,5 @@ public class UserResponseDto {
     private String profileImage;
     private String country;
     private Set<String> roles;
+    private Boolean isAuthor;
 }

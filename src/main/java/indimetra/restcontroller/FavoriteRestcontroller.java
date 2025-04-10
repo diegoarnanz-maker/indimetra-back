@@ -44,35 +44,35 @@ public class FavoriteRestcontroller extends BaseRestcontroller {
 
         // Hay que ver si al solo tener que enviar en el body el cortometrajeId,
         // enviarlo por el path
-        @PostMapping
-        public ResponseEntity<ApiResponse<FavoriteResponseDto>> addFavorite(
-                        @RequestBody @Valid FavoriteRequestDto dto,
-                        Authentication authentication) {
+        // @PostMapping
+        // public ResponseEntity<ApiResponse<FavoriteResponseDto>> addFavorite(
+        //                 @RequestBody @Valid FavoriteRequestDto dto,
+        //                 Authentication authentication) {
 
-                User user = userService.findByUsername(authentication.getName())
-                                .orElseThrow(() -> new NotFoundException("Usuario no encontrado"));
+        //         User user = userService.findByUsername(authentication.getName())
+        //                         .orElseThrow(() -> new NotFoundException("Usuario no encontrado"));
 
-                Cortometraje cortometraje = cortometrajeService.read(dto.getCortometrajeId())
-                                .orElseThrow(() -> new NotFoundException("Cortometraje no encontrado"));
+        //         Cortometraje cortometraje = cortometrajeService.read(dto.getCortometrajeId())
+        //                         .orElseThrow(() -> new NotFoundException("Cortometraje no encontrado"));
 
-                if (favoriteService.isFavoriteOwner(user.getId(), cortometraje.getId())) {
-                        throw new BadRequestException("Este cortometraje ya está en tus favoritos");
-                }
+        //         if (favoriteService.isFavoriteOwner(user.getId(), cortometraje.getId())) {
+        //                 throw new BadRequestException("Este cortometraje ya está en tus favoritos");
+        //         }
 
-                Favorite favorite = Favorite.builder()
-                                .user(user)
-                                .cortometraje(cortometraje)
-                                .build();
+        //         Favorite favorite = Favorite.builder()
+        //                         .user(user)
+        //                         .cortometraje(cortometraje)
+        //                         .build();
 
-                Favorite saved = favoriteService.create(favorite);
+        //         Favorite saved = favoriteService.create(favorite);
 
-                FavoriteResponseDto response = modelMapper.map(saved, FavoriteResponseDto.class);
-                response.setUsername(user.getUsername());
-                response.setCortometrajeId(cortometraje.getId());
-                response.setCortometrajeTitle(cortometraje.getTitle());
+        //         FavoriteResponseDto response = modelMapper.map(saved, FavoriteResponseDto.class);
+        //         response.setUsername(user.getUsername());
+        //         response.setCortometrajeId(cortometraje.getId());
+        //         response.setCortometrajeTitle(cortometraje.getTitle());
 
-                return created(response, "Favorito añadido correctamente");
-        }
+        //         return created(response, "Favorito añadido correctamente");
+        // }
 
         @GetMapping
         public ResponseEntity<ApiResponse<List<FavoriteResponseDto>>> getMyFavorites(Authentication authentication) {

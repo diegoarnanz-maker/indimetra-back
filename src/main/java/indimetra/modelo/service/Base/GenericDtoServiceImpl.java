@@ -8,11 +8,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import indimetra.exception.NotFoundException;
 
-public abstract class GenericDtoServiceImpl<
-    TEntity, 
-    TRequestDto, 
-    TResponseDto, 
-    ID> implements IGenericDtoService<TEntity, TRequestDto, TResponseDto, ID> {
+public abstract class GenericDtoServiceImpl<TEntity, TRequestDto, TResponseDto, ID>
+        implements IGenericDtoService<TEntity, TRequestDto, TResponseDto, ID> {
 
     @Autowired
     protected ModelMapper modelMapper;
@@ -20,20 +17,22 @@ public abstract class GenericDtoServiceImpl<
     protected abstract JpaRepository<TEntity, ID> getRepository();
 
     protected abstract Class<TEntity> getEntityClass();
+
     protected abstract Class<TRequestDto> getRequestDtoClass();
+
     protected abstract Class<TResponseDto> getResponseDtoClass();
 
     @Override
     public List<TResponseDto> findAll() {
         return getRepository().findAll().stream()
-            .map(entity -> modelMapper.map(entity, getResponseDtoClass()))
-            .toList();
+                .map(entity -> modelMapper.map(entity, getResponseDtoClass()))
+                .toList();
     }
 
     @Override
     public TResponseDto findById(ID id) {
         TEntity entity = getRepository().findById(id)
-            .orElseThrow(() -> new NotFoundException("Entidad no encontrada con ID: " + id));
+                .orElseThrow(() -> new NotFoundException("Entidad no encontrada con ID: " + id));
 
         return modelMapper.map(entity, getResponseDtoClass());
     }
@@ -67,9 +66,14 @@ public abstract class GenericDtoServiceImpl<
         getRepository().deleteById(id);
     }
 
+    protected TEntity readEntityById(ID id) {
+        return getRepository().findById(id)
+                .orElseThrow(() -> new NotFoundException("Entidad no encontrada con ID: " + id));
+    }
+
     /**
-     * Método que debes implementar en cada servicio concreto para asignar el ID al entity antes de actualizar.
+     * Método que debes implementar en cada servicio concreto para asignar el ID al
+     * entity antes de actualizar.
      */
     protected abstract void setEntityId(TEntity entity, ID id);
 }
-

@@ -62,6 +62,7 @@ public class SpringSecurityConfig {
                         // Rutas públicas
                         .requestMatchers(HttpMethod.GET,
                                 "/cortometraje",
+                                "/cortometraje/buscar/mis-cortometrajes",
                                 "/cortometraje/buscar/{title}",
                                 "/cortometraje/buscar/categoria/{categoryName}",
                                 "/cortometraje/buscar/latest",
