@@ -16,7 +16,7 @@ import indimetra.modelo.entity.base.BaseEntityCreated;
 @Builder
 public class Cortometraje extends BaseEntityCreated {
 
-    @Column(nullable = false, length = 255)
+    @Column(unique = true, nullable = false)
     private String title;
 
     @Column(columnDefinition = "TEXT")
