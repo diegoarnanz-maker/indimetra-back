@@ -1,6 +1,7 @@
 package indimetra.modelo.service.Base;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface IGenericDtoService<
     TEntity, 
@@ -17,5 +18,7 @@ public interface IGenericDtoService<
     TResponseDto update(ID id, TRequestDto dto);
 
     void delete(ID id);
+
+    Optional<TEntity> read(ID id);
 }
 

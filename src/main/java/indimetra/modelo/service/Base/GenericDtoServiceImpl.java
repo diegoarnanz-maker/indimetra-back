@@ -1,6 +1,7 @@
 package indimetra.modelo.service.Base;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,6 +65,11 @@ public abstract class GenericDtoServiceImpl<TEntity, TRequestDto, TResponseDto, 
         }
 
         getRepository().deleteById(id);
+    }
+
+    @Override
+    public Optional<TEntity> read(ID id) {
+        return getRepository().findById(id);
     }
 
     protected TEntity readEntityById(ID id) {
