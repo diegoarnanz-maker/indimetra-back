@@ -47,18 +47,18 @@ public class SpringSecurityConfig {
                 .cors(Customizer.withDefaults())
 
                 .authorizeHttpRequests(authorize -> authorize
-                        // SWAGGER - permitir acceso sin autenticación
+                // SWAGGER - permitir acceso sin autenticación
                         .requestMatchers(
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/swagger-ui.html"
                         ).permitAll()
     
-                        // AUTHORIZATION
+                // AUTHORIZATION
                         .requestMatchers(HttpMethod.POST, "/auth/login", "/auth/register").permitAll()
                         .requestMatchers(HttpMethod.GET, "/auth/me").authenticated()
 
-                        // CORTOMETRAJES
+                // CORTOMETRAJES
                         // Rutas públicas
                         .requestMatchers(HttpMethod.GET,
                                 "/cortometraje",
@@ -75,7 +75,7 @@ public class SpringSecurityConfig {
                         // Rutas ROLE_USER
                         .requestMatchers(HttpMethod.POST, "/cortometraje").hasAuthority("ROLE_USER")
 
-                        // CATEGORY
+                // CATEGORY
                         // Rutas públicas
                         .requestMatchers(HttpMethod.GET,
                                 "/category",
@@ -87,7 +87,7 @@ public class SpringSecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/category/{id}").hasAuthority("ROLE_ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/category/{id}").hasAuthority("ROLE_ADMIN")
 
-                        // REVIEW
+                // REVIEW
                         .requestMatchers(HttpMethod.GET,
                                 "/review",
                                 "/review/{id}")
@@ -98,7 +98,7 @@ public class SpringSecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/review/{id}").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/review/{id}").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
 
-                        // FAVORITE
+                // FAVORITE
                         // Rutas públicas
                         .requestMatchers(HttpMethod.POST, "/favorite").hasAuthority("ROLE_USER")
                         .requestMatchers(HttpMethod.GET, "/favorite").hasAuthority("ROLE_USER")
@@ -108,8 +108,12 @@ public class SpringSecurityConfig {
 
                         // ROLE_ADMIN
                         // .requestMatchers(HttpMethod.GET, "/favorite/all").hasAuthority("ROLE_ADMIN")
+                
+                // ROLE
+                        // ROLE_ADMIN
+                        .requestMatchers("/roles/**").hasAuthority("ROLE_ADMIN")
 
-                        // USER
+                // USER
                         // ROLE_ADMIN
 
                         // ROLE_ADMIN / ROLE_USER(owner)
