@@ -4,19 +4,11 @@ import java.util.Optional;
 
 import indimetra.modelo.entity.Review;
 import indimetra.modelo.entity.User;
-import indimetra.modelo.service.Base.IGenericoCRUD;
+import indimetra.modelo.service.Base.IGenericDtoService;
+import indimetra.modelo.service.Review.Model.ReviewRequestDto;
+import indimetra.modelo.service.Review.Model.ReviewResponseDto;
 
-public interface IReviewService extends IGenericoCRUD<Review, Long> {
-
-    // List<ReviewDto> findAllWithDto();
-
-    // List<ReviewDto> findByUserId(Long userId);
-
-    // List<ReviewDto> findBySeriesId(Long seriesId);
-
-    // List<ReviewDto> findByMinRating(Double minRating);
-
-    // List<ReviewDto> findByRatingRange(Double minRating, Double maxRating);
+public interface IReviewService extends IGenericDtoService<Review, ReviewRequestDto, ReviewResponseDto, Long> {
 
     boolean isReviewOwner(Long reviewId, Long userId);
 
@@ -27,5 +19,11 @@ public interface IReviewService extends IGenericoCRUD<Review, Long> {
     boolean existsByUserAndCortometraje(Long userId, Long cortometrajeId);
 
     Optional<Review> findByIdIfOwnerOrAdmin(Long id, User user);
+
+    ReviewResponseDto createWithValidation(ReviewRequestDto dto, String username);
+
+    ReviewResponseDto updateIfOwnerOrAdmin(Long id, ReviewRequestDto dto, String username);
+
+    void deleteIfOwnerOrAdmin(Long id, String username);
 
 }
