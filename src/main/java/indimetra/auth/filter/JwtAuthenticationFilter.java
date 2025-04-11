@@ -59,8 +59,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
             Authentication authResult) throws IOException, ServletException {
 
-        org.springframework.security.core.userdetails.User user = (org.springframework.security.core.userdetails.User) authResult
-                .getPrincipal();
+        indimetra.modelo.entity.User user = (indimetra.modelo.entity.User) authResult.getPrincipal();
 
         Collection<? extends GrantedAuthority> roles = user.getAuthorities();
 
@@ -74,7 +73,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 .claims(claims)
                 .signWith(SECRET_KEY)
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + 3600000)) // El token expira en 1 hora
+                .expiration(new Date(System.currentTimeMillis() + 3600000)) // Token expira en 1 hora
                 .compact();
 
         response.addHeader(HEADER_AUTHORIZATION, PREFIX_TOKEN + jwt);
