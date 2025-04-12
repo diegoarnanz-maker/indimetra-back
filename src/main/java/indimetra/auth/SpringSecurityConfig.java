@@ -118,8 +118,14 @@ public class SpringSecurityConfig {
                         .requestMatchers(HttpMethod.GET, 
                                 "/user",
                                 "/user/paginated",
-                                "/user/{id}"
+                                "/user/{id}",
+                                "/user/stats",
+                                "/user/buscar/by-role/{role}",
+                                "/user/buscar/by-username/{username}"
                         ).hasAuthority("ROLE_ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/user/toggle-role/{id}")
+                        .hasAuthority("ROLE_ADMIN")
+
                         // ROLE_USER(owner)
                         .requestMatchers(HttpMethod.PUT, 
                                 "/user/me",

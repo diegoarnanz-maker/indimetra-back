@@ -1,6 +1,7 @@
 package indimetra.modelo.service.User;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import indimetra.modelo.entity.User;
@@ -30,5 +31,11 @@ public interface IUserService extends IGenericDtoService<User, UserRequestDto, U
     void deleteIfNotAdmin(Long id, String username);
 
     PagedResponse<UserResponseDto> findAllPaginated(int page, int size);
+
+    void toggleRole(Long userId);
+
+    List<UserResponseDto> findByUsernameContains(String username);
+
+    Map<String, Integer> getUserCountByRole();
 
 }

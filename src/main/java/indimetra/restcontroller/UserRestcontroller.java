@@ -1,6 +1,7 @@
 package indimetra.restcontroller;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -51,6 +52,34 @@ public class UserRestcontroller extends BaseRestcontroller {
         return success(response, "Usuario encontrado");
     }
 
+    @GetMapping("/stats")
+    public ResponseEntity<ApiResponse<Map<String, Integer>>> getUserStatsByRole() {
+        Map<String, Integer> stats = userService.getUserCountByRole();
+        return success(stats, "Estadísticas de usuarios por rol");
+    }
+
+    @GetMapping("/buscar/by-role/{role}")
+    public ResponseEntity<ApiResponse<List<UserResponseDto>>> findByRole(@PathVariable String role) {
+        List<UserResponseDto> usuarios = userService.findByRole(role);
+        return success(usuarios, "Usuarios con rol: " + role);
+    }
+
+    @GetMapping("/buscar/by-username/{username}")
+    public ResponseEntity<ApiResponse<List<UserResponseDto>>> findByUsernameContains(@PathVariable String username) {
+        List<UserResponseDto> usuarios = userService.findByUsernameContains(username);
+        return success(usuarios, "Usuarios que contienen en su nombre: " + username);
+    }
+
+    @PutMapping("/toggle-role/{id}")
+    public ResponseEntity<ApiResponse<Void>> toggleUserRole(@PathVariable Long id) {
+        if (!isAdmin()) {
+            return failure("No tienes permisos para realizar esta acción");
+        }
+
+        userService.toggleRole(id);
+        return success(null, "Rol del usuario actualizado correctamente");
+    }
+
     @PutMapping("/me")
     public ResponseEntity<ApiResponse<UserResponseDto>> updateMyProfile(
             @RequestBody @Valid UserProfileUpdateDto dto) {
@@ -67,11 +96,6 @@ public class UserRestcontroller extends BaseRestcontroller {
         return success(null, "Contraseña actualizada correctamente");
     }
 
-    //FALTA PARA ADMIN PODER CAMBIAR A UN USUARIO ROLE_USER A ROLE_ADMIN
-    // @PutMapping("/change-role/{id}")
-
-    //FALTA PODER deleteMyAccount
-
-    //FILTRAR USUARIOS POR ROLE / USERNAME
+    // FALTA PONER deleteMyAccount
 
 }
