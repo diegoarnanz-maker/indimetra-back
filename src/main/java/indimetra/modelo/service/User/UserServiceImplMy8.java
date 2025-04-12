@@ -1,7 +1,11 @@
 package indimetra.modelo.service.User;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -16,6 +20,7 @@ import indimetra.exception.BadRequestException;
 import indimetra.exception.NotFoundException;
 import indimetra.modelo.entity.Role;
 import indimetra.modelo.entity.User;
+import indimetra.modelo.repository.IRoleRepository;
 import indimetra.modelo.repository.IUserRepository;
 import indimetra.modelo.service.Base.GenericDtoServiceImpl;
 import indimetra.modelo.service.Shared.Model.PagedResponse;
@@ -31,6 +36,9 @@ public class UserServiceImplMy8
 
     @Autowired
     private IUserRepository userRepository;
+
+    @Autowired
+    private IRoleRepository roleRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -170,6 +178,49 @@ public class UserServiceImplMy8
                 .page(page)
                 .pageSize(size)
                 .build();
+    }
+
+    @Override
+    public void toggleRole(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Usuario no encontrado con ID: " + userId));
+
+        boolean isCurrentlyAdmin = user.getRoles().stream()
+                .anyMatch(r -> r.getName() == Role.RoleType.ROLE_ADMIN);
+
+        Role.RoleType newRoleType = isCurrentlyAdmin ? Role.RoleType.ROLE_USER : Role.RoleType.ROLE_ADMIN;
+
+        Role newRole = roleRepository.findByName(newRoleType)
+                .orElseThrow(() -> new NotFoundException("Rol no encontrado: " + newRoleType.name()));
+
+        Set<Role> roles = new HashSet<>();
+        roles.add(newRole);
+        user.setRoles(roles);
+
+        userRepository.save(user);
+    }
+
+    @Override
+    public List<UserResponseDto> findByUsernameContains(String username) {
+        return userRepository.findByUsernameContainingIgnoreCase(username).stream()
+                .map(user -> modelMapper.map(user, UserResponseDto.class))
+                .toList();
+    }
+
+    @Override
+    public Map<String, Integer> getUserCountByRole() {
+        List<User> allUsers = userRepository.findAll();
+
+        Map<String, Integer> roleCount = new HashMap<>();
+
+        allUsers.forEach(user -> {
+            user.getRoles().forEach(role -> {
+                String roleName = role.getName().name().replace("ROLE_", "").toLowerCase();
+                roleCount.put(roleName, roleCount.getOrDefault(roleName, 0) + 1);
+            });
+        });
+
+        return roleCount;
     }
 
 }
