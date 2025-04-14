@@ -42,6 +42,14 @@ public class AuthServiceImpl implements IAuthService {
         User user = userRepository.findByUsername(loginDto.getUsername())
                 .orElseThrow(() -> new NotFoundException("Usuario no encontrado"));
 
+        if (!user.getIsActive()) {
+            throw new BadRequestException("Tu cuenta está deshabilitada. Contacta con soporte.");
+        }
+
+        if (user.getIsDeleted()) {
+            throw new BadRequestException("Tu cuenta ha sido eliminada.");
+        }
+
         if (!passwordEncoder.matches(loginDto.getPassword(), user.getPassword())) {
             throw new BadRequestException("Credenciales inválidas");
         }

@@ -6,7 +6,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import indimetra.modelo.entity.base.BaseEntityCreated;
+import indimetra.modelo.entity.base.BaseEntityFull;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -19,7 +19,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class User extends BaseEntityCreated implements UserDetails {
+public class User extends BaseEntityFull implements UserDetails {
 
     @Column(nullable = false, unique = true, length = 50)
     private String username;
@@ -54,4 +54,10 @@ public class User extends BaseEntityCreated implements UserDetails {
                 .map(r -> new SimpleGrantedAuthority(r.getName().name()))
                 .toList();
     }
+
+    @Override
+    public boolean isEnabled() {
+        return Boolean.TRUE.equals(this.isActive) && Boolean.FALSE.equals(this.isDeleted);
+    }
+
 }

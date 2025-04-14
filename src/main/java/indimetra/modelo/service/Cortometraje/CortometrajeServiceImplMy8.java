@@ -16,9 +16,13 @@ import indimetra.exception.ForbiddenException;
 import indimetra.exception.NotFoundException;
 import indimetra.modelo.entity.Category;
 import indimetra.modelo.entity.Cortometraje;
+import indimetra.modelo.entity.Favorite;
+import indimetra.modelo.entity.Review;
 import indimetra.modelo.entity.Role;
 import indimetra.modelo.entity.User;
 import indimetra.modelo.repository.ICortometrajeRepository;
+import indimetra.modelo.repository.IFavoriteRepository;
+import indimetra.modelo.repository.IReviewRepository;
 import indimetra.modelo.service.Base.GenericDtoServiceImpl;
 import indimetra.modelo.service.Category.ICategoryService;
 import indimetra.modelo.service.Cortometraje.Model.CortometrajeRequestDto;
@@ -33,6 +37,12 @@ public class CortometrajeServiceImplMy8
 
     @Autowired
     private ICortometrajeRepository cortometrajeRepository;
+
+    @Autowired
+    private IReviewRepository reviewRepository;
+
+    @Autowired
+    private IFavoriteRepository favoriteRepository;
 
     @Autowired
     private IUserService userService;
@@ -97,15 +107,11 @@ public class CortometrajeServiceImplMy8
             throw new IllegalArgumentException("La categoría no puede estar vacía");
         }
 
-        List<Cortometraje> cortos = cortometrajeRepository.findByCategoryNameIgnoreCase(category);
-
-        if (cortos.isEmpty()) {
+        List<Cortometraje> cortos = cortometrajeRepository
+                .findByCategoryNameIgnoreCaseAndIsActiveTrueAndIsDeletedFalse(category);
+        if (cortos.isEmpty())
             throw new NotFoundException("No se encontraron cortometrajes en la categoría: " + category);
-        }
-
-        return cortos.stream()
-                .map(c -> modelMapper.map(c, CortometrajeResponseDto.class))
-                .toList();
+        return cortos.stream().map(c -> modelMapper.map(c, CortometrajeResponseDto.class)).toList();
     }
 
     @Override
@@ -132,7 +138,8 @@ public class CortometrajeServiceImplMy8
             throw new IllegalArgumentException("El título no puede estar vacío");
         }
 
-        List<Cortometraje> cortometrajes = cortometrajeRepository.findByTitleContainingIgnoreCase(title);
+        List<Cortometraje> cortometrajes = cortometrajeRepository
+                .findByTitleContainingIgnoreCaseAndIsActiveTrueAndIsDeletedFalse(title);
 
         if (cortometrajes.isEmpty()) {
             throw new NotFoundException("No se encontraron cortometrajes con el título: " + title);
@@ -254,12 +261,29 @@ public class CortometrajeServiceImplMy8
         Cortometraje cortometraje = findByIdIfOwnerOrAdmin(id, usuario)
                 .orElseThrow(() -> new ForbiddenException("No tienes permisos para eliminar este cortometraje"));
 
-        cortometrajeRepository.delete(cortometraje);
+        // Marcar cortometraje como eliminado
+        cortometraje.setIsDeleted(true);
+        cortometraje.setIsActive(false);
+        cortometrajeRepository.save(cortometraje);
 
-        // Verificar si el usuario aún tiene más cortometrajes
-        boolean tieneMasCortometrajes = cortometrajeRepository.existsByUserId(usuario.getId());
+        // Marcar reviews como eliminadas
+        List<Review> reviews = reviewRepository.findByCortometrajeId(cortometraje.getId());
+        for (Review review : reviews) {
+            review.setIsDeleted(true);
+            review.setIsActive(false);
+        }
+        reviewRepository.saveAll(reviews);
 
-        // Si no tiene más, actualizar isAuthor a false
+        // Marcar favoritos como eliminados
+        List<Favorite> favoritos = favoriteRepository.findByCortometrajeId(cortometraje.getId());
+        for (Favorite fav : favoritos) {
+            fav.setIsDeleted(true);
+            fav.setIsActive(false);
+        }
+        favoriteRepository.saveAll(favoritos);
+
+        // Comprobar si el usuario debe dejar de ser autor
+        boolean tieneMasCortometrajes = cortometrajeRepository.existsByUserIdAndIsDeletedFalse(usuario.getId());
         if (!tieneMasCortometrajes && usuario.getIsAuthor()) {
             userService.updateAuthorStatus(usuario.getId(), false);
         }
@@ -270,10 +294,10 @@ public class CortometrajeServiceImplMy8
         User user = userService.findByUsername(username)
                 .orElseThrow(() -> new NotFoundException("Usuario no encontrado: " + username));
 
-        List<Cortometraje> lista = cortometrajeRepository.findByUser(user);
+        List<Cortometraje> lista = cortometrajeRepository.findByUserAndIsActiveTrueAndIsDeletedFalse(user);
 
         if (lista.isEmpty()) {
-            throw new NotFoundException("No tienes cortometrajes creados aún.");
+            throw new NotFoundException("No tienes cortometrajes activos creados aún.");
         }
 
         return lista.stream()

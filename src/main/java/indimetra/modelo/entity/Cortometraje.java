@@ -5,7 +5,7 @@ import lombok.*;
 
 import java.math.BigDecimal;
 
-import indimetra.modelo.entity.base.BaseEntityCreated;
+import indimetra.modelo.entity.base.BaseEntityFull;
 
 @Entity
 @Table(name = "cortometrajes")
@@ -14,7 +14,7 @@ import indimetra.modelo.entity.base.BaseEntityCreated;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Cortometraje extends BaseEntityCreated {
+public class Cortometraje extends BaseEntityFull {
 
     @Column(unique = true, nullable = false)
     private String title;
@@ -53,8 +53,10 @@ public class Cortometraje extends BaseEntityCreated {
 
     @PrePersist
     protected void onCreate() {
+        super.onCreate();
         if (this.language == null) {
             this.language = "Spanish";
         }
     }
+
 }

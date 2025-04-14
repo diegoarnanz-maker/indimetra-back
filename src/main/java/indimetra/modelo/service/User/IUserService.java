@@ -38,4 +38,14 @@ public interface IUserService extends IGenericDtoService<User, UserRequestDto, U
 
     Map<String, Integer> getUserCountByRole();
 
+    void setUserActiveStatus(Long userId, boolean isActive);
+
+    void reactivateUser(Long userId);
+
+    PagedResponse<UserResponseDto> findActiveUsersPaginated(int page, int size);
+
+    void softDeleteUser(Long id, String currentUsername);
+
+    void deleteMyAccount(String username);
+
 }

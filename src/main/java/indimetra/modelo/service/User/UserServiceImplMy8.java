@@ -18,8 +18,14 @@ import org.springframework.stereotype.Service;
 
 import indimetra.exception.BadRequestException;
 import indimetra.exception.NotFoundException;
+import indimetra.modelo.entity.Cortometraje;
+import indimetra.modelo.entity.Favorite;
+import indimetra.modelo.entity.Review;
 import indimetra.modelo.entity.Role;
 import indimetra.modelo.entity.User;
+import indimetra.modelo.repository.ICortometrajeRepository;
+import indimetra.modelo.repository.IFavoriteRepository;
+import indimetra.modelo.repository.IReviewRepository;
 import indimetra.modelo.repository.IRoleRepository;
 import indimetra.modelo.repository.IUserRepository;
 import indimetra.modelo.service.Base.GenericDtoServiceImpl;
@@ -39,6 +45,15 @@ public class UserServiceImplMy8
 
     @Autowired
     private IRoleRepository roleRepository;
+
+    @Autowired
+    private ICortometrajeRepository cortometrajeRepository;
+
+    @Autowired
+    private IReviewRepository reviewRepository;
+
+    @Autowired
+    private IFavoriteRepository favoriteRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -73,7 +88,7 @@ public class UserServiceImplMy8
         if (username == null || username.isBlank()) {
             throw new BadRequestException("El nombre de usuario no puede estar vacío");
         }
-        return userRepository.findByUsername(username);
+        return userRepository.findByUsernameAndIsActiveTrueAndIsDeletedFalse(username);
     }
 
     @Override
@@ -81,7 +96,7 @@ public class UserServiceImplMy8
         if (email == null || email.isBlank()) {
             throw new BadRequestException("El correo electrónico no puede estar vacío");
         }
-        return userRepository.findByEmail(email);
+        return userRepository.findByEmailAndIsActiveTrueAndIsDeletedFalse(email);
     }
 
     @Override
@@ -153,9 +168,10 @@ public class UserServiceImplMy8
     public List<UserResponseDto> findByRole(String role) {
         try {
             Role.RoleType roleType = Role.RoleType.valueOf(role);
-            return userRepository.findByRoles_Name(roleType).stream()
+            return userRepository.findByRoles_NameAndIsActiveTrueAndIsDeletedFalse(roleType).stream()
                     .map(user -> modelMapper.map(user, UserResponseDto.class))
                     .toList();
+
         } catch (IllegalArgumentException ex) {
             throw new BadRequestException("Rol no válido: " + role);
         }
@@ -202,7 +218,7 @@ public class UserServiceImplMy8
 
     @Override
     public List<UserResponseDto> findByUsernameContains(String username) {
-        return userRepository.findByUsernameContainingIgnoreCase(username).stream()
+        return userRepository.findByUsernameContainingIgnoreCaseAndIsActiveTrueAndIsDeletedFalse(username).stream()
                 .map(user -> modelMapper.map(user, UserResponseDto.class))
                 .toList();
     }
@@ -221,6 +237,128 @@ public class UserServiceImplMy8
         });
 
         return roleCount;
+    }
+
+    @Override
+    public void setUserActiveStatus(Long userId, boolean isActive) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Usuario no encontrado con ID: " + userId));
+
+        user.setIsActive(isActive);
+        userRepository.save(user);
+
+        // Marcar cortometrajes relacionados también como inactivos
+        List<Cortometraje> cortos = cortometrajeRepository.findByUser(user);
+        for (Cortometraje corto : cortos) {
+            if (!corto.getIsDeleted()) {
+                corto.setIsActive(isActive);
+            }
+        }
+        cortometrajeRepository.saveAll(cortos);
+
+        // Marcar también reviews y favoritos como inactivos si sus cortos lo son
+        for (Cortometraje corto : cortos) {
+            if (!corto.getIsDeleted()) {
+                List<Review> reviews = reviewRepository.findByCortometrajeId(corto.getId());
+                for (Review r : reviews) {
+                    r.setIsActive(isActive);
+                }
+                reviewRepository.saveAll(reviews);
+
+                List<Favorite> favoritos = favoriteRepository.findByCortometrajeId(corto.getId());
+                for (Favorite f : favoritos) {
+                    f.setIsActive(isActive);
+                }
+                favoriteRepository.saveAll(favoritos);
+            }
+        }
+    }
+
+    @Override
+    public void reactivateUser(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Usuario no encontrado con ID: " + userId));
+
+        if (Boolean.TRUE.equals(user.getIsActive()) && Boolean.FALSE.equals(user.getIsDeleted())) {
+            throw new BadRequestException("El usuario ya está activo.");
+        }
+
+        user.setIsActive(true);
+        user.setIsDeleted(false);
+        userRepository.save(user);
+
+        // Reactivar también sus cortometrajes no eliminados
+        List<Cortometraje> cortos = cortometrajeRepository.findByUser(user);
+        for (Cortometraje corto : cortos) {
+            if (!corto.getIsDeleted()) {
+                corto.setIsActive(true);
+            }
+        }
+        cortometrajeRepository.saveAll(cortos);
+
+        // Reactivar también las reviews y favoritos si el cortometraje sigue activo
+        for (Cortometraje corto : cortos) {
+            if (!corto.getIsDeleted()) {
+                List<Review> reviews = reviewRepository.findByCortometrajeId(corto.getId());
+                for (Review r : reviews) {
+                    r.setIsActive(true);
+                }
+                reviewRepository.saveAll(reviews);
+
+                List<Favorite> favoritos = favoriteRepository.findByCortometrajeId(corto.getId());
+                for (Favorite f : favoritos) {
+                    f.setIsActive(true);
+                }
+                favoriteRepository.saveAll(favoritos);
+            }
+        }
+    }
+
+    @Override
+    public PagedResponse<UserResponseDto> findActiveUsersPaginated(int page, int size) {
+        PageRequest pageable = PageRequest.of(page, size);
+        Page<User> userPage = userRepository.findByIsActiveTrueAndIsDeletedFalse(pageable);
+
+        List<UserResponseDto> data = userPage.getContent()
+                .stream()
+                .map(user -> modelMapper.map(user, UserResponseDto.class))
+                .toList();
+
+        return PagedResponse.<UserResponseDto>builder()
+                .message("Usuarios activos paginados correctamente")
+                .data(data)
+                .totalItems((int) userPage.getTotalElements())
+                .page(page)
+                .pageSize(size)
+                .build();
+    }
+
+    @Override
+    public void softDeleteUser(Long id, String currentUsername) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Usuario no encontrado con ID: " + id));
+
+        if (user.getUsername().equals(currentUsername)) {
+            throw new BadRequestException("No puedes eliminar tu propia cuenta desde este endpoint.");
+        }
+
+        user.setIsDeleted(true);
+        user.setIsActive(false);
+        userRepository.save(user);
+    }
+
+    @Override
+    public void deleteMyAccount(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new NotFoundException("Usuario no encontrado"));
+
+        if (user.getIsDeleted()) {
+            throw new BadRequestException("La cuenta ya ha sido eliminada");
+        }
+
+        user.setIsDeleted(true);
+        user.setIsActive(false);
+        userRepository.save(user);
     }
 
 }

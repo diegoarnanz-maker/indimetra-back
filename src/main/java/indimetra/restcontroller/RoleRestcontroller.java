@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,12 +28,14 @@ public class RoleRestcontroller extends BaseRestcontroller {
     @Autowired
     private IRoleService roleService;
 
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @GetMapping
     public ResponseEntity<ApiResponse<List<RoleResponseDto>>> findAll() {
         List<RoleResponseDto> response = roleService.findAll();
         return success(response, "Listado de roles");
     }
 
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<RoleResponseDto>> findById(@PathVariable Long id) {
         RoleResponseDto response = roleService.findById(id);
@@ -46,6 +49,7 @@ public class RoleRestcontroller extends BaseRestcontroller {
     // return created(response, "Rol creado correctamente");
     // }
 
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<RoleResponseDto>> update(
             @PathVariable Long id,

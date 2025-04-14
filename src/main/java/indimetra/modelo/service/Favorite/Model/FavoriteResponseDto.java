@@ -12,5 +12,5 @@ public class FavoriteResponseDto {
     private Long cortometrajeId;
     private String cortometrajeTitle;
     private String username;
-    private Date addedAt;
+    private Date createdAt;
 }

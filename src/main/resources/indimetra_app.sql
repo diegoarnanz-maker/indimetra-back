@@ -14,12 +14,20 @@ CREATE TABLE users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+ALTER TABLE users
+ADD COLUMN is_active BOOLEAN NOT NULL DEFAULT TRUE,
+ADD COLUMN is_deleted BOOLEAN NOT NULL DEFAULT FALSE;
+
+
 -- Tabla de Roles
 CREATE TABLE roles (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name ENUM('ROLE_ADMIN', 'ROLE_USER') NOT NULL UNIQUE,
     description TEXT NULL  -- Utilizamos text que es mas indicado para descripciones largas
 );
+
+ALTER TABLE roles
+ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
 
 -- Tabla Intermedia entre Usuarios y Roles
 CREATE TABLE user_roles (
@@ -36,6 +44,13 @@ CREATE TABLE categories (
     name VARCHAR(50) NOT NULL UNIQUE,
     description TEXT NULL -- Utilizamos text que es mas indicado para descripciones largas
 );
+
+ALTER TABLE categories
+ADD COLUMN is_active BOOLEAN NOT NULL DEFAULT TRUE,
+ADD COLUMN is_deleted BOOLEAN NOT NULL DEFAULT FALSE;
+
+ALTER TABLE categories
+ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
 
 -- Tabla de Cortometrajes (Películas y Cortometrajes)
 CREATE TABLE cortometrajes (
@@ -56,6 +71,10 @@ CREATE TABLE cortometrajes (
     FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE
 );
 
+ALTER TABLE cortometrajes
+ADD COLUMN is_active BOOLEAN NOT NULL DEFAULT TRUE,
+ADD COLUMN is_deleted BOOLEAN NOT NULL DEFAULT FALSE;
+
 -- Tabla de Valoraciones y Comentarios
 CREATE TABLE reviews (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -68,6 +87,10 @@ CREATE TABLE reviews (
     FOREIGN KEY (cortometraje_id) REFERENCES cortometrajes(id) ON DELETE CASCADE
 );
 
+ALTER TABLE reviews
+ADD COLUMN is_active BOOLEAN NOT NULL DEFAULT TRUE,
+ADD COLUMN is_deleted BOOLEAN NOT NULL DEFAULT FALSE;
+
 -- Tabla de Favoritos
 CREATE TABLE favorites (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -78,6 +101,13 @@ CREATE TABLE favorites (
     FOREIGN KEY (cortometraje_id) REFERENCES cortometrajes(id) ON DELETE CASCADE,
     UNIQUE (user_id, cortometraje_id)
 );
+
+ALTER TABLE favorites
+CHANGE COLUMN added_at created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+
+ALTER TABLE favorites
+ADD COLUMN is_active BOOLEAN NOT NULL DEFAULT TRUE,
+ADD COLUMN is_deleted BOOLEAN NOT NULL DEFAULT FALSE;
 
 -- Insert de prueba
 INSERT INTO roles (name, description) VALUES

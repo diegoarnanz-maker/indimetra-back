@@ -10,6 +10,7 @@ import java.util.Date;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+
 public abstract class BaseEntityFull extends BaseEntity {
 
     @Column(name = "is_active", nullable = false)

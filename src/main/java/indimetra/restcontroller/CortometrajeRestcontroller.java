@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import indimetra.modelo.service.Cortometraje.ICortometrajeService;
@@ -46,6 +47,7 @@ public class CortometrajeRestcontroller extends BaseRestcontroller {
                 return success(response, "Cortometraje encontrado");
         }
 
+        @PreAuthorize("hasAuthority('ROLE_USER')")
         @GetMapping("/buscar/mis-cortometrajes")
         public ResponseEntity<ApiResponse<List<CortometrajeResponseDto>>> buscarMisCortometrajes() {
                 List<CortometrajeResponseDto> response = cortometrajeService.findByUsername(getUsername());
@@ -92,6 +94,7 @@ public class CortometrajeRestcontroller extends BaseRestcontroller {
                 return success(response, "Cortometrajes con duración <= " + minutos + " minutos");
         }
 
+        @PreAuthorize("hasAuthority('ROLE_USER')")
         @PostMapping
         public ResponseEntity<ApiResponse<CortometrajeResponseDto>> create(
                         @RequestBody @Valid CortometrajeRequestDto dto) {
@@ -102,6 +105,7 @@ public class CortometrajeRestcontroller extends BaseRestcontroller {
                 return created(response, "Cortometraje creado correctamente");
         }
 
+        @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN')")
         @PutMapping("/{id}")
         public ResponseEntity<ApiResponse<CortometrajeResponseDto>> update(
                         @PathVariable Long id,
@@ -113,6 +117,7 @@ public class CortometrajeRestcontroller extends BaseRestcontroller {
                 return success(response, "Cortometraje actualizado correctamente");
         }
 
+        @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN')")
         @DeleteMapping("/{id}")
         public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
                 cortometrajeService.deleteIfOwnerOrAdmin(id, getUsername());
