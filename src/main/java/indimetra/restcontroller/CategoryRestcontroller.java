@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import indimetra.modelo.service.Category.ICategoryService;
@@ -33,12 +34,14 @@ public class CategoryRestcontroller extends BaseRestcontroller {
         return success(response, "Categoría encontrada");
     }
 
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @PostMapping
     public ResponseEntity<ApiResponse<CategoryResponseDto>> create(@RequestBody @Valid CategoryRequestDto dto) {
         CategoryResponseDto response = categoryService.create(dto);
         return created(response, "Categoría creada correctamente");
     }
 
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<CategoryResponseDto>> update(@PathVariable Long id,
             @RequestBody @Valid CategoryRequestDto dto) {
@@ -46,6 +49,7 @@ public class CategoryRestcontroller extends BaseRestcontroller {
         return success(response, "Categoría actualizada correctamente");
     }
 
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
         categoryService.delete(id);

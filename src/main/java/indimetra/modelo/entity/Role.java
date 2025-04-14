@@ -3,7 +3,7 @@ package indimetra.modelo.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import indimetra.modelo.entity.base.BaseEntity;
+import indimetra.modelo.entity.base.BaseEntityCreated;
 
 @Entity
 @Table(name = "roles")
@@ -12,7 +12,7 @@ import indimetra.modelo.entity.base.BaseEntity;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Role extends BaseEntity {
+public class Role extends BaseEntityCreated {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, unique = true)

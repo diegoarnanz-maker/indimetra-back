@@ -1,5 +1,6 @@
 package indimetra.modelo.service.Review;
 
+import java.util.List;
 import java.util.Optional;
 
 import indimetra.modelo.entity.Review;
@@ -25,5 +26,7 @@ public interface IReviewService extends IGenericDtoService<Review, ReviewRequest
     ReviewResponseDto updateIfOwnerOrAdmin(Long id, ReviewRequestDto dto, String username);
 
     void deleteIfOwnerOrAdmin(Long id, String username);
+
+    List<ReviewResponseDto> findAllByUsername(String username);
 
 }

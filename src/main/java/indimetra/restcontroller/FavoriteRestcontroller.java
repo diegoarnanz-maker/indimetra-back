@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import indimetra.modelo.service.Favorite.IFavoriteService;
@@ -23,6 +24,7 @@ public class FavoriteRestcontroller extends BaseRestcontroller {
 
         // Hay que ver si al solo tener que enviar en el body el cortometrajeId,
         // enviarlo por el path
+        @PreAuthorize("hasAuthority('ROLE_USER')")
         @PostMapping
         public ResponseEntity<ApiResponse<FavoriteResponseDto>> addFavorite(
                         @RequestBody @Valid FavoriteRequestDto dto) {
@@ -31,12 +33,14 @@ public class FavoriteRestcontroller extends BaseRestcontroller {
                 return created(response, "Favorito añadido correctamente");
         }
 
-        @GetMapping
+        @PreAuthorize("hasAuthority('ROLE_USER')")
+        @GetMapping("/mis-favoritos")
         public ResponseEntity<ApiResponse<List<FavoriteResponseDto>>> getMyFavorites() {
                 List<FavoriteResponseDto> response = favoriteService.findAllByUsername(getUsername());
                 return success(response, "Favoritos del usuario");
         }
 
+        @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN')")
         @DeleteMapping("/{id}")
         public ResponseEntity<ApiResponse<Void>> deleteFavorite(@PathVariable Long id) {
                 favoriteService.deleteFavoriteIfOwnerOrAdmin(id, getUsername());

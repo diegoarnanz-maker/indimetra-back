@@ -1,6 +1,5 @@
 package indimetra.modelo.service.Favorite;
 
-import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -94,7 +93,6 @@ public class FavoriteServiceImplMy8
         Favorite favorite = Favorite.builder()
                 .user(user)
                 .cortometraje(cortometraje)
-                .addedAt(new Date())
                 .build();
 
         Favorite saved = favoriteRepository.save(favorite);
@@ -104,7 +102,7 @@ public class FavoriteServiceImplMy8
                 .username(user.getUsername())
                 .cortometrajeId(cortometraje.getId())
                 .cortometrajeTitle(cortometraje.getTitle())
-                .addedAt(saved.getAddedAt())
+                .createdAt(saved.getCreatedAt())
                 .build();
     }
 
@@ -116,7 +114,7 @@ public class FavoriteServiceImplMy8
                         .username(fav.getUser().getUsername())
                         .cortometrajeId(fav.getCortometraje().getId())
                         .cortometrajeTitle(fav.getCortometraje().getTitle())
-                        .addedAt(fav.getAddedAt())
+                        .createdAt(fav.getCreatedAt())
                         .build())
                 .toList();
     }

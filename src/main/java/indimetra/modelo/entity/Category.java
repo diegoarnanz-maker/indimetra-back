@@ -1,6 +1,6 @@
 package indimetra.modelo.entity;
 
-import indimetra.modelo.entity.base.BaseEntity;
+import indimetra.modelo.entity.base.BaseEntityFull;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -11,7 +11,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Category extends BaseEntity {
+public class Category extends BaseEntityFull {
 
     @Column(nullable = false, unique = true, length = 50)
     private String name;

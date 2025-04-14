@@ -15,4 +15,7 @@ public class UserResponseDto {
     private String country;
     private Set<String> roles;
     private Boolean isAuthor;
+
+    private Boolean isActive;
+    private Boolean isDeleted;
 }

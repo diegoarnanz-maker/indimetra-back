@@ -73,7 +73,10 @@ public class SpringSecurityConfig {
                                 "/cortometraje/{id}")
                         .permitAll()
                         // Rutas ROLE_USER
+                        .requestMatchers(HttpMethod.GET, "/cortometraje/buscar/mis-cortometrajes").hasAuthority("ROLE_USER")
                         .requestMatchers(HttpMethod.POST, "/cortometraje").hasAuthority("ROLE_USER")
+                        .requestMatchers(HttpMethod.PUT, "/cortometraje/{id}").hasAuthority("ROLE_USER")
+                        .requestMatchers(HttpMethod.DELETE, "/cortometraje/{id}").hasAuthority("ROLE_USER")
 
                 // CATEGORY
                         // Rutas públicas
@@ -97,11 +100,13 @@ public class SpringSecurityConfig {
                         // ROLE_USER(owner) / ROLE_ADMIN
                         .requestMatchers(HttpMethod.PUT, "/review/{id}").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/review/{id}").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
+                        //USER_OWNER
+                        .requestMatchers(HttpMethod.GET, "/review/mis-reviews").hasAnyAuthority("ROLE_USER")
 
                 // FAVORITE
-                        // Rutas públicas
+                        // Rutas USER
                         .requestMatchers(HttpMethod.POST, "/favorite").hasAuthority("ROLE_USER")
-                        .requestMatchers(HttpMethod.GET, "/favorite").hasAuthority("ROLE_USER")
+                        .requestMatchers(HttpMethod.GET, "/favorite/mis-favoritos").hasAuthority("ROLE_USER")
 
                         // ROLE_USER(owner) / ROLE_ADMIN
                         .requestMatchers(HttpMethod.DELETE, "/favorite/{id}").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
@@ -118,18 +123,24 @@ public class SpringSecurityConfig {
                         .requestMatchers(HttpMethod.GET, 
                                 "/user",
                                 "/user/paginated",
+                                "/user/paginated/active",
                                 "/user/{id}",
                                 "/user/stats",
                                 "/user/buscar/by-role/{role}",
                                 "/user/buscar/by-username/{username}"
                         ).hasAuthority("ROLE_ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/user/toggle-role/{id}")
-                        .hasAuthority("ROLE_ADMIN")
+                        .requestMatchers(HttpMethod.PUT, 
+                                "/user/toggle-role/{id}",
+                                "/user/deactivate/{id}",
+                                "/user/reactivate/{id}",
+                                "/user/soft-delete/{id}"
+                        ).hasAuthority("ROLE_ADMIN")
 
                         // ROLE_USER(owner)
                         .requestMatchers(HttpMethod.PUT, 
                                 "/user/me",
-                                "/user/change-password"
+                                "user/me/delete",
+                                "/user/me/change-password"
                         ).hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
                         
                         // OTRAS

@@ -3,9 +3,7 @@ package indimetra.modelo.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.Date;
-
-import indimetra.modelo.entity.base.BaseEntity;
+import indimetra.modelo.entity.base.BaseEntityFull;
 
 @Entity
 @Table(name = "favorites", uniqueConstraints = {
@@ -16,7 +14,7 @@ import indimetra.modelo.entity.base.BaseEntity;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Favorite extends BaseEntity {
+public class Favorite extends BaseEntityFull {
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
@@ -26,14 +24,4 @@ public class Favorite extends BaseEntity {
     @JoinColumn(name = "cortometraje_id", nullable = false)
     private Cortometraje cortometraje;
 
-    @Column(name = "added_at", updatable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date addedAt;
-
-    @PrePersist
-    protected void onCreate() {
-        if (this.addedAt == null) {
-            this.addedAt = new Date();
-        }
-    }
 }

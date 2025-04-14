@@ -1,6 +1,7 @@
 package indimetra.modelo.service.Review;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -14,6 +15,7 @@ import indimetra.exception.NotFoundException;
 import indimetra.modelo.entity.Review;
 import indimetra.modelo.entity.User;
 import indimetra.modelo.repository.IReviewRepository;
+import indimetra.modelo.repository.IUserRepository;
 import indimetra.modelo.service.Base.GenericDtoServiceImpl;
 import indimetra.modelo.service.Cortometraje.ICortometrajeService;
 import indimetra.modelo.service.Review.Model.ReviewRequestDto;
@@ -29,6 +31,9 @@ public class ReviewServiceImplMy8
 
     @Autowired
     private IReviewRepository reviewRepository;
+
+    @Autowired
+    private IUserRepository userRepository;
 
     @Autowired
     private ICortometrajeService cortometrajeService;
@@ -80,10 +85,8 @@ public class ReviewServiceImplMy8
 
     @Override
     public boolean existsByUserAndCortometraje(Long userId, Long cortometrajeId) {
-        if (userId == null || userId <= 0 || cortometrajeId == null || cortometrajeId <= 0) {
-            throw new BadRequestException("IDs inválidos para usuario o cortometraje");
-        }
-        return reviewRepository.existsByUserIdAndCortometrajeId(userId, cortometrajeId);
+
+        return reviewRepository.existsByUserIdAndCortometrajeIdAndIsDeletedFalse(userId, cortometrajeId);
     }
 
     @Override
@@ -122,6 +125,16 @@ public class ReviewServiceImplMy8
             throw new BadRequestException("Errores de validación: " + mensajeError);
         }
 
+        try {
+            var idField = dto.getClass().getDeclaredField("id");
+            idField.setAccessible(true);
+            Object idValue = idField.get(dto);
+            if (idValue != null) {
+                throw new BadRequestException("No debes enviar el campo 'id' al crear una reseña");
+            }
+        } catch (NoSuchFieldException | IllegalAccessException ignored) {
+        }
+
         User user = userService.findByUsername(username)
                 .orElseThrow(() -> new NotFoundException("Usuario no encontrado: " + username));
 
@@ -133,7 +146,9 @@ public class ReviewServiceImplMy8
             throw new BadRequestException("Ya has realizado una reseña para este cortometraje");
         }
 
-        Review review = modelMapper.map(dto, Review.class);
+        Review review = new Review();
+        review.setRating(dto.getRating());
+        review.setComment(dto.getComment());
         review.setUser(user);
         review.setCortometraje(cortometraje);
 
@@ -200,6 +215,16 @@ public class ReviewServiceImplMy8
 
         reviewRepository.deleteById(id);
         actualizarRatingCortometraje(review.getCortometraje().getId());
+    }
+
+    @Override
+    public List<ReviewResponseDto> findAllByUsername(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new NotFoundException("Usuario no encontrado"));
+
+        return reviewRepository.findByUserIdAndIsDeletedFalse(user.getId()).stream()
+                .map(review -> modelMapper.map(review, ReviewResponseDto.class))
+                .toList();
     }
 
 }

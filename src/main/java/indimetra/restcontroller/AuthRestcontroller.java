@@ -2,6 +2,7 @@ package indimetra.restcontroller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -51,6 +52,7 @@ public class AuthRestcontroller extends BaseRestcontroller {
         return created(newUser, "Usuario registrado correctamente");
     }
 
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/me")
     public ResponseEntity<ApiResponse<UserResponseDto>> getAuthenticatedUser() {
         UserResponseDto user = authService.getAuthenticatedUser(getUsername());

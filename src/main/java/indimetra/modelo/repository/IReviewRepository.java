@@ -1,6 +1,7 @@
 package indimetra.modelo.repository;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -14,7 +15,21 @@ public interface IReviewRepository extends JpaRepository<Review, Long> {
     @Query("SELECT COALESCE(AVG(r.rating), 0) FROM Review r WHERE r.cortometraje.id = :cortometrajeId")
     BigDecimal calcularPromedioRating(@Param("cortometrajeId") Long cortometrajeId);
 
-    // En IReviewRepository.java
     boolean existsByUserIdAndCortometrajeId(Long userId, Long cortometrajeId);
+
+    List<Review> findByUserIdAndIsDeletedFalse(Long userId);
+
+    List<Review> findByIsActiveTrueAndIsDeletedFalse();
+
+    // Filtrados por isActive e isDeleted
+
+    List<Review> findByUserIdAndIsActiveTrueAndIsDeletedFalse(Long userId);
+
+    List<Review> findByCortometrajeIdAndIsActiveTrueAndIsDeletedFalse(Long cortometrajeId);
+
+    List<Review> findByCortometrajeId(Long cortometrajeId);
+
+    boolean existsByUserIdAndCortometrajeIdAndIsDeletedFalse(Long userId, Long cortometrajeId);
+
 
 }

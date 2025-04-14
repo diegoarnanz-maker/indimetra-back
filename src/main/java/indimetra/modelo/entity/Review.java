@@ -5,7 +5,7 @@ import lombok.*;
 
 import java.math.BigDecimal;
 
-import indimetra.modelo.entity.base.BaseEntityCreated;
+import indimetra.modelo.entity.base.BaseEntityFull;
 
 @Entity
 @Table(name = "reviews")
@@ -14,7 +14,7 @@ import indimetra.modelo.entity.base.BaseEntityCreated;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Review extends BaseEntityCreated {
+public class Review extends BaseEntityFull {
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
