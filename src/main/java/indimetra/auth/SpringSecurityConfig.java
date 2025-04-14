@@ -75,8 +75,9 @@ public class SpringSecurityConfig {
                         // Rutas ROLE_USER
                         .requestMatchers(HttpMethod.GET, "/cortometraje/buscar/mis-cortometrajes").hasAuthority("ROLE_USER")
                         .requestMatchers(HttpMethod.POST, "/cortometraje").hasAuthority("ROLE_USER")
-                        .requestMatchers(HttpMethod.PUT, "/cortometraje/{id}").hasAuthority("ROLE_USER")
-                        .requestMatchers(HttpMethod.DELETE, "/cortometraje/{id}").hasAuthority("ROLE_USER")
+                        // Rutas ROLE_ADMIN / ROLE_USER(owner)
+                        .requestMatchers(HttpMethod.DELETE, "/cortometraje/{id}").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/cortometraje/{id}").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
 
                 // CATEGORY
                         // Rutas públicas

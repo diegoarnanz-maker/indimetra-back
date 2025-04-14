@@ -79,14 +79,28 @@ public class CortometrajeServiceImplMy8
     }
 
     @Override
-    public Page<CortometrajeResponseDto> findAll(Pageable pageable) {
-        return cortometrajeRepository.findAll(pageable)
-                .map(entity -> modelMapper.map(entity, CortometrajeResponseDto.class));
+    public List<CortometrajeResponseDto> findAll() {
+        List<Cortometraje> cortosVisibles = cortometrajeRepository.findAllVisible();
+
+        return cortosVisibles.stream()
+                .map(c -> modelMapper.map(c, CortometrajeResponseDto.class))
+                .toList();
+    }
+
+    @Override
+    public CortometrajeResponseDto findById(Long id) {
+        Cortometraje entity = readEntityById(id);
+
+        if (entity.getIsDeleted() || !entity.getIsActive() || !entity.getUser().getIsActive()) {
+            throw new NotFoundException("Cortometraje no disponible");
+        }
+
+        return modelMapper.map(entity, CortometrajeResponseDto.class);
     }
 
     @Override
     public PagedResponse<CortometrajeResponseDto> findAllPaginated(Pageable pageable) {
-        var pageResult = cortometrajeRepository.findAll(pageable);
+        Page<Cortometraje> pageResult = cortometrajeRepository.findAllVisible(pageable);
 
         List<CortometrajeResponseDto> dtoList = pageResult.getContent().stream()
                 .map(c -> modelMapper.map(c, CortometrajeResponseDto.class))
@@ -99,6 +113,12 @@ public class CortometrajeServiceImplMy8
                 .page(pageResult.getNumber())
                 .pageSize(pageResult.getSize())
                 .build();
+    }
+
+    @Override
+    public Page<CortometrajeResponseDto> findAll(Pageable pageable) {
+        return cortometrajeRepository.findAllVisible(pageable)
+                .map(c -> modelMapper.map(c, CortometrajeResponseDto.class));
     }
 
     @Override
@@ -123,13 +143,16 @@ public class CortometrajeServiceImplMy8
         List<Cortometraje> resultados = cortometrajeRepository
                 .findByRatingGreaterThanEqual(BigDecimal.valueOf(rating));
 
-        if (resultados.isEmpty()) {
+        List<CortometrajeResponseDto> filtrados = resultados.stream()
+                .filter(c -> c.getIsActive() && !c.getIsDeleted())
+                .map(c -> modelMapper.map(c, CortometrajeResponseDto.class))
+                .toList();
+
+        if (filtrados.isEmpty()) {
             throw new NotFoundException("No se encontraron cortometrajes con rating >= " + rating);
         }
 
-        return resultados.stream()
-                .map(c -> modelMapper.map(c, CortometrajeResponseDto.class))
-                .collect(Collectors.toList());
+        return filtrados;
     }
 
     @Override
@@ -152,8 +175,8 @@ public class CortometrajeServiceImplMy8
 
     @Override
     public List<CortometrajeResponseDto> findLatestSeries() {
-        return cortometrajeRepository.findTop5ByOrderByCreatedAtDesc()
-                .stream()
+        return cortometrajeRepository.findTop5ByOrderByCreatedAtDesc().stream()
+                .filter(c -> c.getIsActive() && !c.getIsDeleted() && c.getUser().getIsActive())
                 .map(c -> modelMapper.map(c, CortometrajeResponseDto.class))
                 .collect(Collectors.toList());
     }
@@ -180,8 +203,8 @@ public class CortometrajeServiceImplMy8
 
     @Override
     public List<CortometrajeResponseDto> findTopRated() {
-        return cortometrajeRepository.findTop5ByOrderByRatingDesc()
-                .stream()
+        return cortometrajeRepository.findTop5ByOrderByRatingDesc().stream()
+                .filter(c -> c.getIsActive() && !c.getIsDeleted())
                 .map(c -> modelMapper.map(c, CortometrajeResponseDto.class))
                 .collect(Collectors.toList());
     }
@@ -194,13 +217,16 @@ public class CortometrajeServiceImplMy8
 
         List<Cortometraje> resultados = cortometrajeRepository.findByDurationLessThanEqual(minutos);
 
-        if (resultados.isEmpty()) {
+        List<CortometrajeResponseDto> filtrados = resultados.stream()
+                .filter(c -> c.getIsActive() && !c.getIsDeleted())
+                .map(c -> modelMapper.map(c, CortometrajeResponseDto.class))
+                .collect(Collectors.toList());
+
+        if (filtrados.isEmpty()) {
             throw new NotFoundException("No se encontraron cortometrajes con duración <= " + minutos);
         }
 
-        return resultados.stream()
-                .map(c -> modelMapper.map(c, CortometrajeResponseDto.class))
-                .collect(Collectors.toList());
+        return filtrados;
     }
 
     @Override
