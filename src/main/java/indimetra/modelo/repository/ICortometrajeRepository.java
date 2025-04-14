@@ -44,7 +44,7 @@ public interface ICortometrajeRepository extends JpaRepository<Cortometraje, Lon
     boolean existsByTitleAndIdNot(String title, Long id);
 
     // Filtrados por isActive e isDeleted
-    
+
     List<Cortometraje> findByIsActiveTrueAndIsDeletedFalse();
 
     List<Cortometraje> findByUserAndIsActiveTrueAndIsDeletedFalse(User user);
@@ -54,8 +54,25 @@ public interface ICortometrajeRepository extends JpaRepository<Cortometraje, Lon
     List<Cortometraje> findByCategoryNameIgnoreCaseAndIsActiveTrueAndIsDeletedFalse(String categoryName);
 
     Page<Cortometraje> findByIsActiveTrueAndIsDeletedFalse(Pageable pageable);
-    
+
     boolean existsByUserIdAndIsDeletedFalse(Long userId);
 
+    @Query("""
+                SELECT c FROM Cortometraje c
+                WHERE c.isActive = true
+                AND c.isDeleted = false
+                AND c.user.isActive = true
+                AND c.user.isDeleted = false
+            """)
+    List<Cortometraje> findAllVisible();
+
+    @Query("""
+                SELECT c FROM Cortometraje c
+                WHERE c.isActive = true
+                AND c.isDeleted = false
+                AND c.user.isActive = true
+                AND c.user.isDeleted = false
+            """)
+    Page<Cortometraje> findAllVisible(Pageable pageable);
 
 }
