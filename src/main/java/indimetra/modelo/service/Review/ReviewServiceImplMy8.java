@@ -213,7 +213,10 @@ public class ReviewServiceImplMy8
             throw new ForbiddenException("No tienes permisos para eliminar esta reseña");
         }
 
-        reviewRepository.deleteById(id);
+        review.setIsDeleted(true);
+        review.setIsActive(false);
+        reviewRepository.save(review);
+
         actualizarRatingCortometraje(review.getCortometraje().getId());
     }
 
