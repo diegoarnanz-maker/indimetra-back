@@ -5,21 +5,18 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import indimetra.modelo.service.Role.IRoleService;
 import indimetra.modelo.service.Role.Model.RoleResponseDto;
 import indimetra.modelo.service.Role.Model.RoleUpdateRequestDto;
 import indimetra.restcontroller.base.BaseRestcontroller;
 import indimetra.utils.ApiResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
+@Tag(name = "Role Controller", description = "Gestión de roles de usuario")
 @RestController
 @CrossOrigin(origins = "*")
 @RequestMapping("/role")
@@ -28,6 +25,13 @@ public class RoleRestcontroller extends BaseRestcontroller {
     @Autowired
     private IRoleService roleService;
 
+    // ============================================
+    // 🔐 ZONA ADMIN (ROLE_ADMIN)
+    // ============================================
+
+    // 🔹 LECTURA
+
+    @Operation(summary = "Obtener todos los roles")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @GetMapping
     public ResponseEntity<ApiResponse<List<RoleResponseDto>>> findAll() {
@@ -35,6 +39,7 @@ public class RoleRestcontroller extends BaseRestcontroller {
         return success(response, "Listado de roles");
     }
 
+    @Operation(summary = "Obtener un rol por ID")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<RoleResponseDto>> findById(@PathVariable Long id) {
@@ -42,13 +47,9 @@ public class RoleRestcontroller extends BaseRestcontroller {
         return success(response, "Rol encontrado");
     }
 
-    // @PostMapping
-    // public ResponseEntity<ApiResponse<RoleResponseDto>> create(@RequestBody
-    // @Valid RoleRequestDto dto) {
-    // RoleResponseDto response = roleService.create(dto);
-    // return created(response, "Rol creado correctamente");
-    // }
+    // 🔹 GESTIÓN
 
+    @Operation(summary = "Actualizar la descripción de un rol")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<RoleResponseDto>> update(
@@ -57,11 +58,4 @@ public class RoleRestcontroller extends BaseRestcontroller {
         RoleResponseDto response = roleService.updateDescription(id, dto);
         return success(response, "Descripción del rol actualizada correctamente");
     }
-
-    // @DeleteMapping("/{id}")
-    // public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
-    // roleService.delete(id);
-    // return success(null, "Rol eliminado correctamente");
-    // }
-
 }

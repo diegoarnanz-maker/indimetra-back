@@ -3,46 +3,61 @@ package indimetra.modelo.service.Base;
 import java.util.List;
 import java.util.Optional;
 
-// Usamos javadoc para facilitar lectura pues es un interfaz de servicios genéricos
-
 /**
- * Interfaz genérica para operaciones CRUD básicas.
+ * Interfaz genérica para operaciones CRUD básicas directamente con entidades.
  *
- * @param <E>  Tipo de entidad
- * @param <ID> Tipo del identificador de la entidad
+ * @param <E>  Tipo de entidad gestionada
+ * @param <ID> Tipo del identificador primario
  */
 public interface IGenericoCRUD<E, ID> {
 
+    // ============================================================
+    // 🔍 BÚSQUEDA Y LECTURA
+    // ============================================================
+
     /**
      * Obtiene todos los registros de la entidad.
+     *
      * @return Lista de todas las entidades
      */
     List<E> findAll();
 
     /**
-     * Crea un nuevo registro en la base de datos.
-     * @param entity La entidad a guardar
-     * @return La entidad guardada
+     * Obtiene un registro por su ID.
+     *
+     * @param id Identificador del registro
+     * @return Optional con la entidad si existe
+     */
+    Optional<E> read(ID id);
+
+    // ============================================================
+    // ➕ CREACIÓN Y ACTUALIZACIÓN
+    // ============================================================
+
+    /**
+     * Crea un nuevo registro.
+     *
+     * @param entity Entidad a guardar
+     * @return Entidad creada
      */
     E create(E entity);
 
     /**
-     * Obtiene un registro por su ID.
-     * @param id El identificador de la entidad
-     * @return Un `Optional<E>` que contiene la entidad si existe
-     */
-    Optional<E> read(ID id);
-
-    /**
-     * Actualiza un registro en la base de datos.
-     * @param entity La entidad con los datos actualizados
-     * @return La entidad actualizada
+     * Actualiza un registro existente.
+     *
+     * @param entity Entidad con los datos actualizados
+     * @return Entidad actualizada
      */
     E update(E entity);
 
+    // ============================================================
+    // 🗑️ ELIMINACIÓN
+    // ============================================================
+
     /**
-     * Elimina un registro de la base de datos por su ID.
-     * @param id El identificador de la entidad a eliminar
+     * Elimina un registro por su ID.
+     *
+     * @param id Identificador de la entidad a eliminar
      */
     void delete(ID id);
 }

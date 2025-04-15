@@ -69,18 +69,52 @@ public class ReviewServiceImplMy8
         entity.setId(id);
     }
 
-    // Métodos personalizados
+    // ============================================================
+    // METODOS SOBREESCRITOS
+    // ============================================================
+
+    @Override
+    public ReviewResponseDto findById(Long id) {
+        Review review = readEntityById(id);
+
+        if (review.getIsDeleted()
+                || review.getCortometraje() == null
+                || review.getCortometraje().getIsDeleted()
+                || !review.getCortometraje().getIsActive()
+                || !review.getCortometraje().getUser().getIsActive()) {
+            throw new NotFoundException("Reseña no disponible o el cortometraje está desactivado");
+        }
+
+        return ReviewResponseDto.builder()
+                .id(review.getId())
+                .rating(review.getRating())
+                .comment(review.getComment())
+                .username(review.getUser().getUsername())
+                .cortometrajeId(review.getCortometraje().getId())
+                .cortometrajeTitle(review.getCortometraje().getTitle())
+                .build();
+    }
+
+    @Override
+    public List<ReviewResponseDto> findAll() {
+        return reviewRepository.findByIsDeletedFalse().stream()
+                .filter(r -> r.getCortometraje() != null &&
+                        r.getCortometraje().getIsActive() &&
+                        !r.getCortometraje().getIsDeleted() &&
+                        r.getCortometraje().getUser().getIsActive())
+                .map(r -> modelMapper.map(r, ReviewResponseDto.class))
+                .toList();
+    }
+
+    // ============================================================
+    // 🔍 BÚSQUEDA Y LECTURA
+    // ============================================================
 
     @Override
     public boolean isReviewOwner(Long reviewId, Long userId) {
         return read(reviewId)
                 .map(review -> review.getUser().getId().equals(userId))
                 .orElseThrow(() -> new NotFoundException("Review no encontrada"));
-    }
-
-    @Override
-    public boolean existsByUserAndSeries(Long userId, Long seriesId) {
-        throw new UnsupportedOperationException("No implementado");
     }
 
     @Override
@@ -104,6 +138,35 @@ public class ReviewServiceImplMy8
 
         return Optional.of(review);
     }
+
+    @Override
+    public List<ReviewResponseDto> findAllByUsername(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new NotFoundException("Usuario no encontrado"));
+
+        return reviewRepository.findByUserIdAndIsDeletedFalse(user.getId()).stream()
+                .filter(r -> r.getCortometraje() != null &&
+                        r.getCortometraje().getIsActive() &&
+                        !r.getCortometraje().getIsDeleted() &&
+                        r.getCortometraje().getUser().getIsActive())
+                .map(review -> modelMapper.map(review, ReviewResponseDto.class))
+                .toList();
+    }
+
+    @Override
+    public List<ReviewResponseDto> findAllByCortometrajeId(Long cortometrajeId) {
+        return reviewRepository.findByCortometrajeIdAndIsDeletedFalse(cortometrajeId).stream()
+                .filter(r -> r.getCortometraje() != null &&
+                        r.getCortometraje().getIsActive() &&
+                        !r.getCortometraje().getIsDeleted() &&
+                        r.getCortometraje().getUser().getIsActive())
+                .map(review -> modelMapper.map(review, ReviewResponseDto.class))
+                .toList();
+    }
+
+    // ============================================================
+    // 🔧 ACTUALIZACIÓN Y GESTIÓN
+    // ============================================================
 
     @Override
     public void actualizarRatingCortometraje(Long cortometrajeId) {
@@ -197,6 +260,10 @@ public class ReviewServiceImplMy8
                 .build();
     }
 
+    // ============================================================
+    // 🗑️ ELIMINACIÓN Y RESTAURACIÓN
+    // ============================================================
+
     @Override
     public void deleteIfOwnerOrAdmin(Long id, String username) {
         User user = userService.findByUsername(username)
@@ -218,64 +285,6 @@ public class ReviewServiceImplMy8
         reviewRepository.save(review);
 
         actualizarRatingCortometraje(review.getCortometraje().getId());
-    }
-
-    @Override
-    public List<ReviewResponseDto> findAllByUsername(String username) {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new NotFoundException("Usuario no encontrado"));
-
-        return reviewRepository.findByUserIdAndIsDeletedFalse(user.getId()).stream()
-                .filter(r -> r.getCortometraje() != null &&
-                        r.getCortometraje().getIsActive() &&
-                        !r.getCortometraje().getIsDeleted() &&
-                        r.getCortometraje().getUser().getIsActive())
-                .map(review -> modelMapper.map(review, ReviewResponseDto.class))
-                .toList();
-    }
-
-    @Override
-    public ReviewResponseDto findById(Long id) {
-        Review review = readEntityById(id);
-
-        if (review.getIsDeleted()
-                || review.getCortometraje() == null
-                || review.getCortometraje().getIsDeleted()
-                || !review.getCortometraje().getIsActive()
-                || !review.getCortometraje().getUser().getIsActive()) {
-            throw new NotFoundException("Reseña no disponible o el cortometraje está desactivado");
-        }
-
-        return ReviewResponseDto.builder()
-                .id(review.getId())
-                .rating(review.getRating())
-                .comment(review.getComment())
-                .username(review.getUser().getUsername())
-                .cortometrajeId(review.getCortometraje().getId())
-                .cortometrajeTitle(review.getCortometraje().getTitle())
-                .build();
-    }
-
-    @Override
-    public List<ReviewResponseDto> findAll() {
-        return reviewRepository.findByIsDeletedFalse().stream()
-                .filter(r -> r.getCortometraje() != null &&
-                        r.getCortometraje().getIsActive() &&
-                        !r.getCortometraje().getIsDeleted() &&
-                        r.getCortometraje().getUser().getIsActive())
-                .map(r -> modelMapper.map(r, ReviewResponseDto.class))
-                .toList();
-    }
-
-    @Override
-    public List<ReviewResponseDto> findAllByCortometrajeId(Long cortometrajeId) {
-        return reviewRepository.findByCortometrajeIdAndIsDeletedFalse(cortometrajeId).stream()
-                .filter(r -> r.getCortometraje() != null &&
-                        r.getCortometraje().getIsActive() &&
-                        !r.getCortometraje().getIsDeleted() &&
-                        r.getCortometraje().getUser().getIsActive())
-                .map(review -> modelMapper.map(review, ReviewResponseDto.class))
-                .toList();
     }
 
 }

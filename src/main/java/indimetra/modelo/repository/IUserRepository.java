@@ -12,21 +12,21 @@ import indimetra.modelo.entity.User;
 
 public interface IUserRepository extends JpaRepository<User, Long> {
 
+    // Búsqueda directa por campos únicos
     Optional<User> findByUsername(String username);
-
-    List<User> findByUsernameContainingIgnoreCase(String username);
 
     Optional<User> findByEmail(String email);
 
-    List<User> findByRoles_Name(RoleType name);
-
-
-    // Filtrados por isActive e isDeleted
+    // Búsqueda filtrada por estado (activos y no eliminados)
     Optional<User> findByUsernameAndIsActiveTrueAndIsDeletedFalse(String username);
-    Optional<User> findByEmailAndIsActiveTrueAndIsDeletedFalse(String email);
-    List<User> findByUsernameContainingIgnoreCaseAndIsActiveTrueAndIsDeletedFalse(String username);
-    List<User> findByRoles_NameAndIsActiveTrueAndIsDeletedFalse(RoleType name);
-    Page<User> findByIsActiveTrueAndIsDeletedFalse(Pageable pageable);
-    
 
+    Optional<User> findByEmailAndIsActiveTrueAndIsDeletedFalse(String email);
+
+    List<User> findByUsernameContainingIgnoreCaseAndIsActiveTrueAndIsDeletedFalse(String username);
+
+    List<User> findByRoles_NameAndIsActiveTrueAndIsDeletedFalse(RoleType name);
+
+    Page<User> findByIsActiveTrueAndIsDeletedFalse(Pageable pageable);
+
+    List<User> findByIsActiveTrueAndIsDeletedFalse();
 }

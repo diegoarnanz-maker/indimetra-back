@@ -10,8 +10,28 @@ import indimetra.modelo.service.Role.Model.RoleUpdateRequestDto;
 
 public interface IRoleService extends IGenericDtoService<Role, RoleRequestDto, RoleResponseDto, Long> {
 
+    // ============================================================
+    // 🔍 BÚSQUEDA Y LECTURA
+    // ============================================================
+
+    /**
+     * Busca un rol por su nombre.
+     * 
+     * @param name Nombre del rol (ej: "ROLE_ADMIN")
+     * @return Optional con el rol encontrado o vacío si no existe.
+     */
     Optional<Role> findByName(String name);
 
-    RoleResponseDto updateDescription(Long id, RoleUpdateRequestDto dto);
+    // ============================================================
+    // 🔧 ACTUALIZACIÓN Y GESTIÓN
+    // ============================================================
 
+    /**
+     * Actualiza la descripción de un rol existente.
+     * 
+     * @param id  ID del rol a actualizar
+     * @param dto Objeto con la nueva descripción
+     * @return DTO actualizado del rol
+     */
+    RoleResponseDto updateDescription(Long id, RoleUpdateRequestDto dto);
 }

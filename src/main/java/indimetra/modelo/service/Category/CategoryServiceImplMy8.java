@@ -51,14 +51,10 @@ public class CategoryServiceImplMy8 extends
         entity.setId(id);
     }
 
-    @Override
-    public Optional<Category> findByName(String name) {
-        if (name == null || name.trim().isEmpty()) {
-            throw new BadRequestException("El nombre de la categoría no puede estar vacío");
-        }
-        return categoryRepository.findByName(name);
-    }
-
+    // ============================================================
+    // METODOS SOBREESCRITOS
+    // ============================================================
+    
     @Override
     public void delete(Long id) {
         Category category = categoryRepository.findById(id)
@@ -71,6 +67,17 @@ public class CategoryServiceImplMy8 extends
         }
 
         categoryRepository.deleteById(id);
+    }
+
+    // ============================================================
+    // 🔍 BÚSQUEDA Y LECTURA
+    // ============================================================
+    @Override
+    public Optional<Category> findByName(String name) {
+        if (name == null || name.trim().isEmpty()) {
+            throw new BadRequestException("El nombre de la categoría no puede estar vacío");
+        }
+        return categoryRepository.findByName(name);
     }
 
 }
