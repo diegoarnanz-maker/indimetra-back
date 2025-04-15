@@ -70,6 +70,8 @@ public class SpringSecurityConfig {
                                 "/cortometraje/buscar/top5-mejor-valorados",
                                 "/cortometraje/buscar/duracion-maxima/{minutos}",
                                 "/cortometraje/paginated",
+                                "/cortometraje/buscar/autor/{username}",
+                                "/cortometraje/buscar/idioma/{language}",
                                 "/cortometraje/{id}")
                         .permitAll()
                         // Rutas ROLE_USER
@@ -92,17 +94,21 @@ public class SpringSecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/category/{id}").hasAuthority("ROLE_ADMIN")
 
                 // REVIEW
+                        // Rutas públicas
                         .requestMatchers(HttpMethod.GET,
                                 "/review",
+                                "/review/buscar/por-cortometraje/{cortometrajeId}",
+                                "/review/buscar/por-usuario/{username}",
                                 "/review/{id}")
-                        .authenticated()
+                        .permitAll()
                         .requestMatchers(HttpMethod.POST, "/review").hasAuthority("ROLE_USER")
 
                         // ROLE_USER(owner) / ROLE_ADMIN
-                        .requestMatchers(HttpMethod.PUT, "/review/{id}").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/review/{id}").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
+                        
                         //USER_OWNER
                         .requestMatchers(HttpMethod.GET, "/review/mis-reviews").hasAnyAuthority("ROLE_USER")
+                        .requestMatchers(HttpMethod.PUT, "/review/{id}").hasAuthority("ROLE_USER")
 
                 // FAVORITE
                         // Rutas USER

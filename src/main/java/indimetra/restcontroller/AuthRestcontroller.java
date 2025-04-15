@@ -52,6 +52,7 @@ public class AuthRestcontroller extends BaseRestcontroller {
         return created(newUser, "Usuario registrado correctamente");
     }
 
+    //FALTA METER REDES SOCIALES EN EL DTO DE SALIDA
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/me")
     public ResponseEntity<ApiResponse<UserResponseDto>> getAuthenticatedUser() {

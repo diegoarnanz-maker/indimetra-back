@@ -93,6 +93,14 @@ public class AuthServiceImpl implements IAuthService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new NotFoundException("Usuario no encontrado: " + username));
 
+        if (!user.getIsActive()) {
+            throw new BadRequestException("Tu cuenta está deshabilitada.");
+        }
+
+        if (user.getIsDeleted()) {
+            throw new BadRequestException("Tu cuenta ha sido eliminada.");
+        }
+
         return modelMapper.map(user, UserResponseDto.class);
     }
 

@@ -29,4 +29,5 @@ public interface IReviewService extends IGenericDtoService<Review, ReviewRequest
 
     List<ReviewResponseDto> findAllByUsername(String username);
 
+    List<ReviewResponseDto> findAllByCortometrajeId(Long cortometrajeId);
 }

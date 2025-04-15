@@ -6,8 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import indimetra.exception.BadRequestException;
+import indimetra.exception.NotFoundException;
 import indimetra.modelo.entity.Category;
 import indimetra.modelo.repository.ICategoryRepository;
+import indimetra.modelo.repository.ICortometrajeRepository;
 import indimetra.modelo.service.Base.GenericDtoServiceImpl;
 import indimetra.modelo.service.Category.Model.CategoryRequestDto;
 import indimetra.modelo.service.Category.Model.CategoryResponseDto;
@@ -18,6 +20,9 @@ public class CategoryServiceImplMy8 extends
 
     @Autowired
     private ICategoryRepository categoryRepository;
+
+    @Autowired
+    private ICortometrajeRepository cortometrajeRepository;
 
     @Override
     protected ICategoryRepository getRepository() {
@@ -39,7 +44,8 @@ public class CategoryServiceImplMy8 extends
         return CategoryResponseDto.class;
     }
 
-    // Usa en la lógica de actualización (update) para asignar manualmente el ID al entity, ya que los DTOs no lo tienen
+    // Usa en la lógica de actualización (update) para asignar manualmente el ID al
+    // entity, ya que los DTOs no lo tienen
     @Override
     protected void setEntityId(Category entity, Long id) {
         entity.setId(id);
@@ -52,4 +58,19 @@ public class CategoryServiceImplMy8 extends
         }
         return categoryRepository.findByName(name);
     }
+
+    @Override
+    public void delete(Long id) {
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Categoría no encontrada con ID: " + id));
+
+        boolean tieneCortosAsociados = cortometrajeRepository.existsByCategory(category);
+
+        if (tieneCortosAsociados) {
+            throw new BadRequestException("No se puede eliminar la categoría. Hay cortometrajes asociados.");
+        }
+
+        categoryRepository.deleteById(id);
+    }
+
 }

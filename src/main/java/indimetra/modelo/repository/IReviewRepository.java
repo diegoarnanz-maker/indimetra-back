@@ -11,17 +11,15 @@ import indimetra.modelo.entity.Review;
 
 public interface IReviewRepository extends JpaRepository<Review, Long> {
 
-    // Hay que hacer pruebas para ver si funciona
-    @Query("SELECT COALESCE(AVG(r.rating), 0) FROM Review r WHERE r.cortometraje.id = :cortometrajeId")
+    @Query("SELECT AVG(r.rating) FROM Review r WHERE r.cortometraje.id = :cortometrajeId AND r.isActive = true AND r.isDeleted = false")
     BigDecimal calcularPromedioRating(@Param("cortometrajeId") Long cortometrajeId);
 
     boolean existsByUserIdAndCortometrajeId(Long userId, Long cortometrajeId);
 
     List<Review> findByUserIdAndIsDeletedFalse(Long userId);
 
-    List<Review> findByIsActiveTrueAndIsDeletedFalse();
-
     // Filtrados por isActive e isDeleted
+    List<Review> findByIsActiveTrueAndIsDeletedFalse();
 
     List<Review> findByUserIdAndIsActiveTrueAndIsDeletedFalse(Long userId);
 
@@ -31,5 +29,8 @@ public interface IReviewRepository extends JpaRepository<Review, Long> {
 
     boolean existsByUserIdAndCortometrajeIdAndIsDeletedFalse(Long userId, Long cortometrajeId);
 
+    List<Review> findByIsDeletedFalse();
+
+    List<Review> findByCortometrajeIdAndIsDeletedFalse(Long cortometrajeId);
 
 }

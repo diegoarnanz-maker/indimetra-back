@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
+import indimetra.modelo.entity.Category;
 import indimetra.modelo.entity.Cortometraje;
 import indimetra.modelo.entity.User;
 
@@ -43,6 +44,8 @@ public interface ICortometrajeRepository extends JpaRepository<Cortometraje, Lon
 
     boolean existsByTitleAndIdNot(String title, Long id);
 
+    boolean existsByCategory(Category category);
+
     // Filtrados por isActive e isDeleted
 
     List<Cortometraje> findByIsActiveTrueAndIsDeletedFalse();
@@ -74,5 +77,7 @@ public interface ICortometrajeRepository extends JpaRepository<Cortometraje, Lon
                 AND c.user.isDeleted = false
             """)
     Page<Cortometraje> findAllVisible(Pageable pageable);
+
+    List<Cortometraje> findByLanguageIgnoreCaseAndIsActiveTrueAndIsDeletedFalse(String language);
 
 }

@@ -15,8 +15,8 @@ public interface IFavoriteService extends IGenericDtoService<Favorite, FavoriteR
 
     boolean isFavoriteOwner(Long userId, Long cortometrajeId);
 
-    FavoriteResponseDto addFavorite(FavoriteRequestDto dto, String username);
-
+    FavoriteResponseDto addOrRestoreFavorite(FavoriteRequestDto dto, String username);
+    
     List<FavoriteResponseDto> findAllByUsername(String username);
 
     void deleteFavoriteIfOwnerOrAdmin(Long id, String username);

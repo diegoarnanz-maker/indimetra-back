@@ -29,7 +29,7 @@ public class FavoriteRestcontroller extends BaseRestcontroller {
         public ResponseEntity<ApiResponse<FavoriteResponseDto>> addFavorite(
                         @RequestBody @Valid FavoriteRequestDto dto) {
 
-                FavoriteResponseDto response = favoriteService.addFavorite(dto, getUsername());
+                FavoriteResponseDto response = favoriteService.addOrRestoreFavorite(dto, getUsername());
                 return created(response, "Favorito añadido correctamente");
         }
 

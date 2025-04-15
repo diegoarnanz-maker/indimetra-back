@@ -45,4 +45,7 @@ public interface ICortometrajeService
 
     List<CortometrajeResponseDto> findByUsername(String username);
 
+    List<CortometrajeResponseDto> findByAuthor(String username);
+
+    List<CortometrajeResponseDto> findByLanguage(String language);
 }
