@@ -75,4 +75,6 @@ public interface ICortometrajeRepository extends JpaRepository<Cortometraje, Lon
             """)
     Page<Cortometraje> findAllVisible(Pageable pageable);
 
+    List<Cortometraje> findByLanguageIgnoreCaseAndIsActiveTrueAndIsDeletedFalse(String language);
+
 }

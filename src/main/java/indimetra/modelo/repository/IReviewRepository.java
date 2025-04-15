@@ -19,9 +19,8 @@ public interface IReviewRepository extends JpaRepository<Review, Long> {
 
     List<Review> findByUserIdAndIsDeletedFalse(Long userId);
 
-    List<Review> findByIsActiveTrueAndIsDeletedFalse();
-
     // Filtrados por isActive e isDeleted
+    List<Review> findByIsActiveTrueAndIsDeletedFalse();
 
     List<Review> findByUserIdAndIsActiveTrueAndIsDeletedFalse(Long userId);
 
@@ -31,5 +30,8 @@ public interface IReviewRepository extends JpaRepository<Review, Long> {
 
     boolean existsByUserIdAndCortometrajeIdAndIsDeletedFalse(Long userId, Long cortometrajeId);
 
+    List<Review> findByIsDeletedFalse();
+
+    List<Review> findByCortometrajeIdAndIsDeletedFalse(Long cortometrajeId);
 
 }

@@ -54,6 +54,20 @@ public class CortometrajeRestcontroller extends BaseRestcontroller {
                 return success(response, "Tus cortometrajes");
         }
 
+        @GetMapping("/buscar/autor/{username}")
+        public ResponseEntity<ApiResponse<List<CortometrajeResponseDto>>> buscarPorAutor(
+                        @PathVariable String username) {
+                List<CortometrajeResponseDto> response = cortometrajeService.findByAuthor(username);
+                return success(response, "Cortometrajes del autor: " + username);
+        }
+
+        @GetMapping("/buscar/idioma/{language}")
+        public ResponseEntity<ApiResponse<List<CortometrajeResponseDto>>> buscarPorIdioma(
+                        @PathVariable String language) {
+                List<CortometrajeResponseDto> response = cortometrajeService.findByLanguage(language);
+                return success(response, "Cortometrajes en idioma: " + language);
+        }
+
         @GetMapping("/buscar/{title}")
         public ResponseEntity<ApiResponse<List<CortometrajeResponseDto>>> buscarPorTitulo(@PathVariable String title) {
                 List<CortometrajeResponseDto> response = cortometrajeService.findByTitleContainingIgnoreCase(title);
@@ -80,6 +94,7 @@ public class CortometrajeRestcontroller extends BaseRestcontroller {
                 return success(response, "Cortometrajes con rating >= " + valor);
         }
 
+        // 4
         @GetMapping("/buscar/top5-mejor-valorados")
         public ResponseEntity<ApiResponse<List<CortometrajeResponseDto>>> obtenerTop5MejorValorados() {
                 List<CortometrajeResponseDto> response = cortometrajeService.findTopRated();

@@ -331,4 +331,38 @@ public class CortometrajeServiceImplMy8
                 .toList();
     }
 
+    @Override
+    public List<CortometrajeResponseDto> findByAuthor(String username) {
+        User user = userService.findByUsername(username)
+                .orElseThrow(() -> new NotFoundException("Usuario no encontrado: " + username));
+
+        List<Cortometraje> lista = cortometrajeRepository.findByUserAndIsActiveTrueAndIsDeletedFalse(user);
+
+        if (lista.isEmpty()) {
+            throw new NotFoundException("Este autor no tiene cortometrajes disponibles.");
+        }
+
+        return lista.stream()
+                .map(c -> modelMapper.map(c, CortometrajeResponseDto.class))
+                .toList();
+    }
+
+    @Override
+    public List<CortometrajeResponseDto> findByLanguage(String language) {
+        if (language == null || language.trim().isEmpty()) {
+            throw new BadRequestException("El idioma no puede estar vacío.");
+        }
+
+        List<Cortometraje> lista = cortometrajeRepository
+                .findByLanguageIgnoreCaseAndIsActiveTrueAndIsDeletedFalse(language);
+
+        if (lista.isEmpty()) {
+            throw new NotFoundException("No se encontraron cortometrajes en el idioma: " + language);
+        }
+
+        return lista.stream()
+                .map(c -> modelMapper.map(c, CortometrajeResponseDto.class))
+                .toList();
+    }
+
 }

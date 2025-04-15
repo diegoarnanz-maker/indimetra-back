@@ -253,4 +253,26 @@ public class ReviewServiceImplMy8
                 .build();
     }
 
+    @Override
+    public List<ReviewResponseDto> findAll() {
+        return reviewRepository.findByIsDeletedFalse().stream()
+                .filter(r -> r.getCortometraje() != null &&
+                        r.getCortometraje().getIsActive() &&
+                        !r.getCortometraje().getIsDeleted() &&
+                        r.getCortometraje().getUser().getIsActive())
+                .map(r -> modelMapper.map(r, ReviewResponseDto.class))
+                .toList();
+    }
+
+    @Override
+    public List<ReviewResponseDto> findAllByCortometrajeId(Long cortometrajeId) {
+        return reviewRepository.findByCortometrajeIdAndIsDeletedFalse(cortometrajeId).stream()
+                .filter(r -> r.getCortometraje() != null &&
+                        r.getCortometraje().getIsActive() &&
+                        !r.getCortometraje().getIsDeleted() &&
+                        r.getCortometraje().getUser().getIsActive())
+                .map(review -> modelMapper.map(review, ReviewResponseDto.class))
+                .toList();
+    }
+
 }

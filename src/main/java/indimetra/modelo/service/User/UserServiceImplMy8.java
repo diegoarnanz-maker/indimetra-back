@@ -247,7 +247,7 @@ public class UserServiceImplMy8
         user.setIsActive(isActive);
         userRepository.save(user);
 
-        // Marcar cortometrajes relacionados también como inactivos
+        // Desactivar/activar cortometrajes
         List<Cortometraje> cortos = cortometrajeRepository.findByUser(user);
         for (Cortometraje corto : cortos) {
             if (!corto.getIsDeleted()) {
@@ -256,9 +256,10 @@ public class UserServiceImplMy8
         }
         cortometrajeRepository.saveAll(cortos);
 
-        // Marcar también reviews y favoritos como inactivos si sus cortos lo son
+        // Desactivar/activar reviews y favoritos según estado del corto
         for (Cortometraje corto : cortos) {
             if (!corto.getIsDeleted()) {
+
                 List<Review> reviews = reviewRepository.findByCortometrajeId(corto.getId());
                 for (Review r : reviews) {
                     r.setIsActive(isActive);
@@ -299,15 +300,20 @@ public class UserServiceImplMy8
         // Reactivar también las reviews y favoritos si el cortometraje sigue activo
         for (Cortometraje corto : cortos) {
             if (!corto.getIsDeleted()) {
+
+                // Reviews
                 List<Review> reviews = reviewRepository.findByCortometrajeId(corto.getId());
                 for (Review r : reviews) {
                     r.setIsActive(true);
+                    r.setIsDeleted(false);
                 }
                 reviewRepository.saveAll(reviews);
 
+                // Favoritos
                 List<Favorite> favoritos = favoriteRepository.findByCortometrajeId(corto.getId());
                 for (Favorite f : favoritos) {
                     f.setIsActive(true);
+                    f.setIsDeleted(false);
                 }
                 favoriteRepository.saveAll(favoritos);
             }
@@ -345,6 +351,9 @@ public class UserServiceImplMy8
         user.setIsDeleted(true);
         user.setIsActive(false);
         userRepository.save(user);
+
+        // Aplicar cascada
+        applyCascadeSoftDelete(user);
     }
 
     @Override
@@ -359,6 +368,39 @@ public class UserServiceImplMy8
         user.setIsDeleted(true);
         user.setIsActive(false);
         userRepository.save(user);
+
+        // Aplicar cascada
+        applyCascadeSoftDelete(user);
+    }
+
+    // Método auxiliar para lógica en cascada
+    private void applyCascadeSoftDelete(User user) {
+        List<Cortometraje> cortos = cortometrajeRepository.findByUser(user);
+        for (Cortometraje corto : cortos) {
+            if (!corto.getIsDeleted()) {
+                corto.setIsActive(false);
+                corto.setIsDeleted(true);
+            }
+        }
+        cortometrajeRepository.saveAll(cortos);
+
+        for (Cortometraje corto : cortos) {
+            // Reviews
+            List<Review> reviews = reviewRepository.findByCortometrajeId(corto.getId());
+            for (Review r : reviews) {
+                r.setIsActive(false);
+                r.setIsDeleted(true);
+            }
+            reviewRepository.saveAll(reviews);
+
+            // Favoritos
+            List<Favorite> favoritos = favoriteRepository.findByCortometrajeId(corto.getId());
+            for (Favorite f : favoritos) {
+                f.setIsActive(false);
+                f.setIsDeleted(true);
+            }
+            favoriteRepository.saveAll(favoritos);
+        }
     }
 
 }
