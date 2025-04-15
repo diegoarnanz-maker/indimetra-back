@@ -223,8 +223,34 @@ public class ReviewServiceImplMy8
                 .orElseThrow(() -> new NotFoundException("Usuario no encontrado"));
 
         return reviewRepository.findByUserIdAndIsDeletedFalse(user.getId()).stream()
+                .filter(r -> r.getCortometraje() != null &&
+                        r.getCortometraje().getIsActive() &&
+                        !r.getCortometraje().getIsDeleted() &&
+                        r.getCortometraje().getUser().getIsActive())
                 .map(review -> modelMapper.map(review, ReviewResponseDto.class))
                 .toList();
+    }
+
+    @Override
+    public ReviewResponseDto findById(Long id) {
+        Review review = readEntityById(id);
+
+        if (review.getIsDeleted()
+                || review.getCortometraje() == null
+                || review.getCortometraje().getIsDeleted()
+                || !review.getCortometraje().getIsActive()
+                || !review.getCortometraje().getUser().getIsActive()) {
+            throw new NotFoundException("Reseña no disponible o el cortometraje está desactivado");
+        }
+
+        return ReviewResponseDto.builder()
+                .id(review.getId())
+                .rating(review.getRating())
+                .comment(review.getComment())
+                .username(review.getUser().getUsername())
+                .cortometrajeId(review.getCortometraje().getId())
+                .cortometrajeTitle(review.getCortometraje().getTitle())
+                .build();
     }
 
 }

@@ -1,6 +1,7 @@
 package indimetra.modelo.service.Favorite;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -79,21 +80,35 @@ public class FavoriteServiceImplMy8
     }
 
     @Override
-    public FavoriteResponseDto addFavorite(FavoriteRequestDto dto, String username) {
+    public FavoriteResponseDto addOrRestoreFavorite(FavoriteRequestDto dto, String username) {
         User user = userService.findByUsername(username)
                 .orElseThrow(() -> new NotFoundException("Usuario no encontrado"));
 
         Cortometraje cortometraje = cortometrajeService.read(dto.getCortometrajeId())
                 .orElseThrow(() -> new NotFoundException("Cortometraje no encontrado"));
 
-        if (isFavoriteOwner(user.getId(), cortometraje.getId())) {
-            throw new BadRequestException("Este cortometraje ya está en tus favoritos");
-        }
+        Optional<Favorite> existingFavoriteOpt = favoriteRepository
+                .findByUserIdAndCortometrajeId(user.getId(), cortometraje.getId());
 
-        Favorite favorite = Favorite.builder()
-                .user(user)
-                .cortometraje(cortometraje)
-                .build();
+        Favorite favorite;
+
+        if (existingFavoriteOpt.isPresent()) {
+            favorite = existingFavoriteOpt.get();
+            if (!favorite.getIsDeleted()) {
+                throw new BadRequestException("Este cortometraje ya está en tus favoritos");
+            }
+
+            // Restaurar favorito
+            favorite.setIsDeleted(false);
+            favorite.setIsActive(true);
+        } else {
+            // Crear nuevo favorito
+            favorite = new Favorite();
+            favorite.setUser(user);
+            favorite.setCortometraje(cortometraje);
+            favorite.setIsDeleted(false);
+            favorite.setIsActive(true);
+        }
 
         Favorite saved = favoriteRepository.save(favorite);
 
@@ -108,7 +123,17 @@ public class FavoriteServiceImplMy8
 
     @Override
     public List<FavoriteResponseDto> findAllByUsername(String username) {
-        return findByUsername(username).stream()
+        User user = userService.findByUsername(username)
+                .orElseThrow(() -> new NotFoundException("Usuario no encontrado"));
+
+        return favoriteRepository.findByUserId(user.getId()).stream()
+                .filter(fav -> Boolean.TRUE.equals(fav.getIsActive()) &&
+                        Boolean.FALSE.equals(fav.getIsDeleted()) &&
+                        fav.getCortometraje() != null &&
+                        Boolean.TRUE.equals(fav.getCortometraje().getIsActive()) &&
+                        Boolean.FALSE.equals(fav.getCortometraje().getIsDeleted()) &&
+                        fav.getCortometraje().getUser() != null &&
+                        Boolean.TRUE.equals(fav.getCortometraje().getUser().getIsActive()))
                 .map(fav -> FavoriteResponseDto.builder()
                         .id(fav.getId())
                         .username(fav.getUser().getUsername())
@@ -135,7 +160,10 @@ public class FavoriteServiceImplMy8
             throw new ForbiddenException("No tienes permiso para eliminar este favorito");
         }
 
-        favoriteRepository.delete(favorite);
+        // Soft delete
+        favorite.setIsDeleted(true);
+        favorite.setIsActive(false);
+        favoriteRepository.save(favorite);
     }
 
 }
