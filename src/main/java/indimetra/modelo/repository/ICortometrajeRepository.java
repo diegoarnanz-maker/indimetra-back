@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
+import indimetra.modelo.entity.Category;
 import indimetra.modelo.entity.Cortometraje;
 import indimetra.modelo.entity.User;
 
@@ -42,6 +43,8 @@ public interface ICortometrajeRepository extends JpaRepository<Cortometraje, Lon
     boolean existsByTitle(String title);
 
     boolean existsByTitleAndIdNot(String title, Long id);
+
+    boolean existsByCategory(Category category);
 
     // Filtrados por isActive e isDeleted
 
