@@ -15,18 +15,30 @@ import indimetra.modelo.entity.Category;
 import indimetra.modelo.entity.Cortometraje;
 import indimetra.modelo.entity.User;
 
+/**
+ * Repositorio JPA para la entidad {@link Cortometraje}.
+ * Proporciona operaciones CRUD y consultas personalizadas para cortometrajes.
+ */
 public interface ICortometrajeRepository extends JpaRepository<Cortometraje, Long> {
 
+    // ============================================================
+    // 🔧 ACTUALIZACIÓN Y GESTIÓN
+    // ============================================================
+
+    /**
+     * Actualiza el rating de un cortometraje por su ID.
+     *
+     * @param id     ID del cortometraje
+     * @param rating nuevo valor de rating
+     */
     @Modifying
     @Transactional
     @Query("UPDATE Cortometraje c SET c.rating = :rating WHERE c.id = :id")
     void updateRating(@Param("id") Long id, @Param("rating") BigDecimal rating);
 
-    @Query("SELECT c FROM Cortometraje c WHERE LOWER(c.title) LIKE LOWER(CONCAT('%', :title, '%'))")
-    List<Cortometraje> findByTitleContainingIgnoreCase(@Param("title") String title);
-
-    @Query("SELECT c FROM Cortometraje c WHERE LOWER(c.category.name) = LOWER(:categoryName)")
-    List<Cortometraje> findByCategoryNameIgnoreCase(@Param("categoryName") String categoryName);
+    // ============================================================
+    // 🔍 BÚSQUEDAS PERSONALIZADAS (sin filtros de estado)
+    // ============================================================
 
     List<Cortometraje> findByRatingGreaterThanEqual(BigDecimal rating);
 
@@ -36,19 +48,28 @@ public interface ICortometrajeRepository extends JpaRepository<Cortometraje, Lon
 
     List<Cortometraje> findByDurationLessThanEqual(Integer duration);
 
-    boolean existsByUserId(Long userId);
-
     List<Cortometraje> findByUser(User user);
 
-    boolean existsByTitle(String title);
+    /**
+     * Busca cortometrajes por título (sin importar mayúsculas/minúsculas).
+     */
+    @Query("SELECT c FROM Cortometraje c WHERE LOWER(c.title) LIKE LOWER(CONCAT('%', :title, '%'))")
+    List<Cortometraje> findByTitleContainingIgnoreCase(@Param("title") String title);
 
-    boolean existsByTitleAndIdNot(String title, Long id);
+    /**
+     * Busca cortometrajes por nombre de categoría (sin importar
+     * mayúsculas/minúsculas).
+     */
+    @Query("SELECT c FROM Cortometraje c WHERE LOWER(c.category.name) = LOWER(:categoryName)")
+    List<Cortometraje> findByCategoryNameIgnoreCase(@Param("categoryName") String categoryName);
 
-    boolean existsByCategory(Category category);
-
-    // Filtrados por isActive e isDeleted
+    // ============================================================
+    // 🔍 BÚSQUEDAS CON FILTRO ACTIVO/NO ELIMINADO
+    // ============================================================
 
     List<Cortometraje> findByIsActiveTrueAndIsDeletedFalse();
+
+    Page<Cortometraje> findByIsActiveTrueAndIsDeletedFalse(Pageable pageable);
 
     List<Cortometraje> findByUserAndIsActiveTrueAndIsDeletedFalse(User user);
 
@@ -56,10 +77,16 @@ public interface ICortometrajeRepository extends JpaRepository<Cortometraje, Lon
 
     List<Cortometraje> findByCategoryNameIgnoreCaseAndIsActiveTrueAndIsDeletedFalse(String categoryName);
 
-    Page<Cortometraje> findByIsActiveTrueAndIsDeletedFalse(Pageable pageable);
+    List<Cortometraje> findByLanguageIgnoreCaseAndIsActiveTrueAndIsDeletedFalse(String language);
 
-    boolean existsByUserIdAndIsDeletedFalse(Long userId);
+    // ============================================================
+    // VISIBILIDAD (autores activos y no eliminados)
+    // ============================================================
 
+    /**
+     * Devuelve los cortometrajes visibles (activos, no eliminados y con autor
+     * activo).
+     */
     @Query("""
                 SELECT c FROM Cortometraje c
                 WHERE c.isActive = true
@@ -69,6 +96,9 @@ public interface ICortometrajeRepository extends JpaRepository<Cortometraje, Lon
             """)
     List<Cortometraje> findAllVisible();
 
+    /**
+     * Devuelve los cortometrajes visibles (versión paginada).
+     */
     @Query("""
                 SELECT c FROM Cortometraje c
                 WHERE c.isActive = true
@@ -78,6 +108,17 @@ public interface ICortometrajeRepository extends JpaRepository<Cortometraje, Lon
             """)
     Page<Cortometraje> findAllVisible(Pageable pageable);
 
-    List<Cortometraje> findByLanguageIgnoreCaseAndIsActiveTrueAndIsDeletedFalse(String language);
+    // ============================================================
+    // ❓ VERIFICACIONES DE EXISTENCIA
+    // ============================================================
 
+    boolean existsByUserId(Long userId);
+
+    boolean existsByUserIdAndIsDeletedFalse(Long userId);
+
+    boolean existsByTitle(String title);
+
+    boolean existsByTitleAndIdNot(String title, Long id);
+
+    boolean existsByCategory(Category category);
 }
