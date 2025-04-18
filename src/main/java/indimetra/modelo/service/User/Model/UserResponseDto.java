@@ -24,7 +24,7 @@ public class UserResponseDto {
     @Schema(description = "Correo electrónico del usuario", example = "correo@dominio.com")
     private String email;
 
-    @Schema(description = "URL de la imagen de perfil del usuario", example = "https://misitio.com/avatar.jpg")
+    @Schema(description = "URL de la imagen de perfil del usuario", example = "https://indimetra.com/avatar.jpg")
     private String profileImage;
 
     @Schema(description = "País de residencia", example = "España")

@@ -286,6 +286,16 @@ public class CortometrajeServiceImplMy8
     }
 
     @Override
+    public void actualizarRatingCortometraje(Long cortometrajeId) {
+        if (cortometrajeId == null || cortometrajeId <= 0) {
+            throw new BadRequestException("ID de cortometraje inválido");
+        }
+
+        BigDecimal promedio = reviewRepository.calcularPromedioRating(cortometrajeId);
+        cortometrajeRepository.updateRating(cortometrajeId, promedio != null ? promedio : BigDecimal.ZERO);
+    }
+
+    @Override
     public CortometrajeResponseDto createWithValidation(CortometrajeRequestDto dto, String username) {
         User autor = userService.findByUsername(username)
                 .orElseThrow(() -> new NotFoundException("Usuario no encontrado: " + username));

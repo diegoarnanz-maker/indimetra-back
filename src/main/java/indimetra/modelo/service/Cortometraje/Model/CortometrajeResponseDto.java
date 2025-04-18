@@ -40,10 +40,10 @@ public class CortometrajeResponseDto {
     @Schema(description = "Valoración promedio del cortometraje", example = "4.3")
     private BigDecimal rating;
 
-    @Schema(description = "URL de la imagen de portada", example = "https://miapp.com/images/corto123.jpg")
+    @Schema(description = "URL de la imagen de portada", example = "https://indimetra.com/images/corto123.jpg")
     private String imageUrl;
 
-    @Schema(description = "URL del video", example = "https://miapp.com/videos/corto123.mp4")
+    @Schema(description = "URL del video", example = "https://indimetra.com/videos/corto123.mp4")
     private String videoUrl;
 
     @Schema(description = "Nombre de la categoría", example = "Animación")

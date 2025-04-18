@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import indimetra.modelo.entity.Review;
+import indimetra.modelo.entity.User;
 
 /**
  * Repositorio JPA para la entidad {@link Review}.
@@ -58,6 +59,11 @@ public interface IReviewRepository extends JpaRepository<Review, Long> {
      * Devuelve todas las reseñas no eliminadas.
      */
     List<Review> findByIsDeletedFalse();
+
+    /**
+     * Devuelve todas las pasando un objeto User.
+     */
+    List<Review> findByUser(User user);
 
     // ============================================================
     // 🔍 BÚSQUEDAS POR USUARIO

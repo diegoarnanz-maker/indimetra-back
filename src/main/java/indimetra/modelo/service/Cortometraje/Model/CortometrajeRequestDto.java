@@ -47,11 +47,11 @@ public class CortometrajeRequestDto {
     @Schema(description = "Rating inicial del cortometraje", example = "4.5")
     private BigDecimal rating;
 
-    @Schema(description = "URL de la imagen de portada", example = "https://miapp.com/images/corto123.jpg")
+    @Schema(description = "URL de la imagen de portada", example = "https://indimetra.com/images/corto123.jpg")
     private String imageUrl;
 
     @NotBlank(message = "La URL del video es obligatoria")
-    @Schema(description = "URL del video del cortometraje", example = "https://miapp.com/videos/corto123.mp4")
+    @Schema(description = "URL del video del cortometraje", example = "https://indimetra.com/videos/corto123.mp4")
     private String videoUrl;
 
     @NotBlank(message = "La categoría es obligatoria")

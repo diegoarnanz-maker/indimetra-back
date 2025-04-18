@@ -32,7 +32,7 @@ public class UserRequestDto {
     @Schema(description = "Contraseña del usuario (mínimo 8 caracteres)", example = "contrasena123", required = true)
     private String password;
 
-    @Schema(description = "URL de la imagen de perfil", example = "https://misitio.com/imagen.jpg")
+    @Schema(description = "URL de la imagen de perfil", example = "https://indimetra.com/imagen.jpg")
     private String profileImage;
 
     @Schema(description = "País de residencia del usuario", example = "España")

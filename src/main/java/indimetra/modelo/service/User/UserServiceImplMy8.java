@@ -29,11 +29,14 @@ import indimetra.modelo.repository.IReviewRepository;
 import indimetra.modelo.repository.IRoleRepository;
 import indimetra.modelo.repository.IUserRepository;
 import indimetra.modelo.service.Base.GenericDtoServiceImpl;
+import indimetra.modelo.service.Cortometraje.ICortometrajeService;
+import indimetra.modelo.service.Cortometraje.helper.RatingService;
 import indimetra.modelo.service.Shared.Model.PagedResponse;
 import indimetra.modelo.service.User.Model.UserChangePasswordDto;
 import indimetra.modelo.service.User.Model.UserProfileUpdateDto;
 import indimetra.modelo.service.User.Model.UserRequestDto;
 import indimetra.modelo.service.User.Model.UserResponseDto;
+import jakarta.transaction.Transactional;
 
 @Service
 public class UserServiceImplMy8
@@ -54,6 +57,9 @@ public class UserServiceImplMy8
 
     @Autowired
     private IFavoriteRepository favoriteRepository;
+
+    @Autowired
+    private RatingService ratingService;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -92,7 +98,7 @@ public class UserServiceImplMy8
     // ============================================================
     // 🔍 BÚSQUEDA Y LECTURA
     // ============================================================
-    
+
     @Override
     public Optional<User> findByUsername(String username) {
         if (username == null || username.isBlank()) {
@@ -241,6 +247,7 @@ public class UserServiceImplMy8
         userRepository.save(user);
     }
 
+    @Transactional
     @Override
     public void setUserActiveStatus(Long userId, boolean isActive) {
         User user = userRepository.findById(userId)
@@ -275,8 +282,27 @@ public class UserServiceImplMy8
                 favoriteRepository.saveAll(favoritos);
             }
         }
+
+        // Desactivar/activar reviews y favoritos HECHOS por el usuario
+        List<Review> userReviews = reviewRepository.findByUser(user);
+        for (Review review : userReviews) {
+            review.setIsActive(isActive);
+        }
+        reviewRepository.saveAll(userReviews);
+
+        List<Favorite> userFavorites = favoriteRepository.findByUserId(user.getId());
+        for (Favorite favorite : userFavorites) {
+            favorite.setIsActive(isActive);
+        }
+        favoriteRepository.saveAll(userFavorites);
+
+        for (Cortometraje corto : cortos) {
+            ratingService.actualizarRatingCortometraje(corto.getId());
+        }
+
     }
 
+    @Transactional
     @Override
     public void reactivateUser(Long userId) {
         User user = userRepository.findById(userId)
@@ -320,6 +346,27 @@ public class UserServiceImplMy8
                 favoriteRepository.saveAll(favoritos);
             }
         }
+
+        // Reactivar también las reviews HECHAS por el usuario
+        List<Review> userReviews = reviewRepository.findByUser(user);
+        for (Review review : userReviews) {
+            review.setIsActive(true);
+            review.setIsDeleted(false);
+        }
+        reviewRepository.saveAll(userReviews);
+
+        // Reactivar también los favoritos HECHOS por el usuario
+        List<Favorite> userFavorites = favoriteRepository.findByUserId(user.getId());
+        for (Favorite favorite : userFavorites) {
+            favorite.setIsActive(true);
+            favorite.setIsDeleted(false);
+        }
+        favoriteRepository.saveAll(userFavorites);
+
+        for (Cortometraje corto : cortos) {
+            ratingService.actualizarRatingCortometraje(corto.getId());
+        }
+
     }
 
     // ============================================================

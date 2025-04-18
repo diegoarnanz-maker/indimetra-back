@@ -15,7 +15,7 @@ import lombok.*;
 @Schema(description = "DTO para actualizar el perfil del usuario")
 public class UserProfileUpdateDto {
 
-    @Schema(description = "URL de la imagen de perfil del usuario", example = "https://misitio.com/perfil.jpg")
+    @Schema(description = "URL de la imagen de perfil del usuario", example = "https://indimetra.com/perfil.jpg")
     private String profileImage;
 
     @Schema(description = "Enlaces a redes sociales del usuario", example = "https://twitter.com/usuario")

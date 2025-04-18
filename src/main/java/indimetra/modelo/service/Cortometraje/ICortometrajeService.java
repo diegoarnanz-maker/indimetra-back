@@ -135,6 +135,14 @@ public interface ICortometrajeService
     void updateRating(Long id, BigDecimal rating);
 
     /**
+     * Recalcula y actualiza el rating promedio del cortometraje, considerando solo
+     * las reseñas activas y no eliminadas.
+     *
+     * @param cortometrajeId ID del cortometraje
+     */
+    void actualizarRatingCortometraje(Long cortometrajeId);
+
+    /**
      * Crea un nuevo cortometraje con validación de duplicados y relación con
      * autor/categoría.
      *
