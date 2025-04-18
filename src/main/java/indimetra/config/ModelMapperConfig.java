@@ -17,19 +17,33 @@ import indimetra.modelo.service.Cortometraje.Model.CortometrajeResponseDto;
 import indimetra.modelo.service.Review.Model.ReviewResponseDto;
 import indimetra.modelo.service.User.Model.UserResponseDto;
 
+/**
+ * Configuración global de ModelMapper para personalizar el mapeo entre
+ * entidades y DTOs.
+ */
 @Configuration
 public class ModelMapperConfig {
 
+    /**
+     * Bean que configura el {@link ModelMapper} con conversiones personalizadas
+     * para entidades como {@link User}, {@link Cortometraje} y {@link Review}.
+     *
+     * @return instancia configurada de ModelMapper
+     */
     @Bean
     public ModelMapper modelMapper() {
         ModelMapper modelMapper = new ModelMapper();
 
-        // Transformar roles de Role a Set<String>
+        // ============================================
+        // MAPEOS PERSONALIZADOS
+        // ============================================
+
+        // Conversión de Set<Role> a Set<String> (nombre del rol)
         Converter<Set<Role>, Set<String>> roleConverter = ctx -> ctx.getSource().stream()
                 .map(role -> role.getName().name())
                 .collect(Collectors.toSet());
 
-        // Mapeo de User a UserResponseDto
+        // User -> UserResponseDto
         modelMapper.typeMap(User.class, UserResponseDto.class)
                 .addMappings(new PropertyMap<User, UserResponseDto>() {
                     @Override
@@ -38,7 +52,7 @@ public class ModelMapperConfig {
                     }
                 });
 
-        // Mapeo de Cortometraje a CortometrajeResponseDto
+        // Cortometraje -> CortometrajeResponseDto
         modelMapper.typeMap(Cortometraje.class, CortometrajeResponseDto.class)
                 .addMappings(new PropertyMap<Cortometraje, CortometrajeResponseDto>() {
                     @Override
@@ -48,7 +62,7 @@ public class ModelMapperConfig {
                     }
                 });
 
-        // Mapeo de Review a ReviewResponseDto
+        // Review -> ReviewResponseDto
         modelMapper.typeMap(Review.class, ReviewResponseDto.class)
                 .addMappings(new PropertyMap<Review, ReviewResponseDto>() {
                     @Override

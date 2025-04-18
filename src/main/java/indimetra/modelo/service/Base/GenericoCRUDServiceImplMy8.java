@@ -10,12 +10,28 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Implementación base genérica para operaciones CRUD usando JpaRepository.
+ *
+ * @param <E>  Tipo de entidad
+ * @param <ID> Tipo del identificador de la entidad
+ */
 public abstract class GenericoCRUDServiceImplMy8<E, ID> implements IGenericoCRUD<E, ID> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GenericoCRUDServiceImplMy8.class);
 
+    /**
+     * Proporciona el repositorio JPA correspondiente a la entidad.
+     *
+     * @return JpaRepository de la entidad
+     */
     protected abstract JpaRepository<E, ID> getRepository();
 
+    /**
+     * Recupera todos los registros de la entidad.
+     *
+     * @return Lista de todas las entidades
+     */
     @Override
     public List<E> findAll() {
         try {
@@ -26,6 +42,13 @@ public abstract class GenericoCRUDServiceImplMy8<E, ID> implements IGenericoCRUD
         }
     }
 
+    /**
+     * Crea un nuevo registro de entidad en la base de datos.
+     *
+     * @param entity Entidad a crear
+     * @return Entidad creada
+     * @throws BadRequestException si la entidad es nula
+     */
     @Override
     @Transactional
     public E create(E entity) {
@@ -42,6 +65,13 @@ public abstract class GenericoCRUDServiceImplMy8<E, ID> implements IGenericoCRUD
         }
     }
 
+    /**
+     * Recupera una entidad por su identificador.
+     *
+     * @param id Identificador de la entidad
+     * @return Optional con la entidad si existe
+     * @throws BadRequestException si el ID es nulo
+     */
     @Override
     public Optional<E> read(ID id) {
         if (id == null) {
@@ -56,6 +86,13 @@ public abstract class GenericoCRUDServiceImplMy8<E, ID> implements IGenericoCRUD
         }
     }
 
+    /**
+     * Actualiza una entidad existente.
+     *
+     * @param entity Entidad con datos actualizados
+     * @return Entidad actualizada
+     * @throws BadRequestException si la entidad es nula
+     */
     @Override
     @Transactional
     public E update(E entity) {
@@ -72,6 +109,13 @@ public abstract class GenericoCRUDServiceImplMy8<E, ID> implements IGenericoCRUD
         }
     }
 
+    /**
+     * Elimina una entidad por su identificador.
+     *
+     * @param id ID de la entidad a eliminar
+     * @throws BadRequestException si el ID es nulo
+     * @throws NotFoundException   si no existe una entidad con el ID dado
+     */
     @Override
     @Transactional
     public void delete(ID id) {

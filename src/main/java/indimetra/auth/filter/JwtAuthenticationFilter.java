@@ -1,7 +1,6 @@
 package indimetra.auth.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import indimetra.auth.TokenJwtConfig;
 import indimetra.modelo.entity.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -23,19 +22,43 @@ import java.util.*;
 
 import static indimetra.auth.TokenJwtConfig.*;
 
-//Se ejecuta cuando el usuario hace login. Lee el username y password del cuerpo de la petición, y si son válidos:
-// Genera un token JWT firmado con tu SECRET_KEY.
-
-// Lo envía al cliente en la cabecera y como JSON en el body.
+/**
+ * Filtro de autenticación JWT que se ejecuta cuando un usuario intenta iniciar
+ * sesión.
+ * <p>
+ * Este filtro:
+ * <ul>
+ * <li>Lee las credenciales del cuerpo de la petición (username y password)</li>
+ * <li>Valida las credenciales utilizando el {@link AuthenticationManager}</li>
+ * <li>Si son válidas, genera un JWT firmado y lo envía en la cabecera de la
+ * respuesta y en el cuerpo</li>
+ * </ul>
+ */
 public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
     private final AuthenticationManager authenticationManager;
 
+    /**
+     * Constructor que recibe el AuthenticationManager para delegar la
+     * autenticación.
+     *
+     * @param authenticationManager componente encargado de autenticar las
+     *                              credenciales del usuario
+     */
     public JwtAuthenticationFilter(AuthenticationManager authenticationManager) {
         this.authenticationManager = authenticationManager;
-        setFilterProcessesUrl("/auth/login");
+        setFilterProcessesUrl("/auth/login"); // URL donde se intercepta el login
     }
 
+    /**
+     * Método que intenta autenticar al usuario leyendo las credenciales del cuerpo
+     * de la petición.
+     *
+     * @param request  petición HTTP con el JSON del usuario
+     * @param response respuesta HTTP
+     * @return objeto Authentication si las credenciales son válidas
+     * @throws AuthenticationException si las credenciales son incorrectas
+     */
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
             throws AuthenticationException {
@@ -55,12 +78,22 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         return this.authenticationManager.authenticate(token);
     }
 
+    /**
+     * Se ejecuta si la autenticación es exitosa. Genera un JWT firmado y lo
+     * devuelve al cliente.
+     *
+     * @param request    petición original
+     * @param response   respuesta HTTP donde se añade el token
+     * @param chain      cadena de filtros
+     * @param authResult resultado de la autenticación
+     * @throws IOException
+     * @throws ServletException
+     */
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
             Authentication authResult) throws IOException, ServletException {
 
-        indimetra.modelo.entity.User user = (indimetra.modelo.entity.User) authResult.getPrincipal();
-
+        User user = (User) authResult.getPrincipal();
         Collection<? extends GrantedAuthority> roles = user.getAuthorities();
 
         Claims claims = Jwts.claims()
@@ -73,7 +106,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 .claims(claims)
                 .signWith(SECRET_KEY)
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + 3600000)) // Token expira en 1 hora
+                .expiration(new Date(System.currentTimeMillis() + 3600000)) // 1 hora de expiración
                 .compact();
 
         response.addHeader(HEADER_AUTHORIZATION, PREFIX_TOKEN + jwt);
@@ -88,6 +121,16 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         response.setStatus(HttpServletResponse.SC_OK);
     }
 
+    /**
+     * Se ejecuta si la autenticación falla. Devuelve un mensaje de error
+     * personalizado.
+     *
+     * @param request  petición original
+     * @param response respuesta HTTP con el error
+     * @param failed   excepción con el motivo del fallo
+     * @throws IOException
+     * @throws ServletException
+     */
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,
             AuthenticationException failed) throws IOException, ServletException {

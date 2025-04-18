@@ -58,6 +58,10 @@ public class FavoriteServiceImplMy8
         entity.setId(id);
     }
 
+    // ============================================================
+    // 🔍 BÚSQUEDA Y LECTURA
+    // ============================================================
+
     @Override
     public boolean isFavoriteOwner(Long userId, Long cortometrajeId) {
         return favoriteRepository.findByUserIdAndCortometrajeId(userId, cortometrajeId).isPresent();
@@ -78,6 +82,33 @@ public class FavoriteServiceImplMy8
         }
         return favoriteRepository.findByUserUsername(username);
     }
+
+    @Override
+    public List<FavoriteResponseDto> findAllByUsername(String username) {
+        User user = userService.findByUsername(username)
+                .orElseThrow(() -> new NotFoundException("Usuario no encontrado"));
+
+        return favoriteRepository.findByUserId(user.getId()).stream()
+                .filter(fav -> Boolean.TRUE.equals(fav.getIsActive()) &&
+                        Boolean.FALSE.equals(fav.getIsDeleted()) &&
+                        fav.getCortometraje() != null &&
+                        Boolean.TRUE.equals(fav.getCortometraje().getIsActive()) &&
+                        Boolean.FALSE.equals(fav.getCortometraje().getIsDeleted()) &&
+                        fav.getCortometraje().getUser() != null &&
+                        Boolean.TRUE.equals(fav.getCortometraje().getUser().getIsActive()))
+                .map(fav -> FavoriteResponseDto.builder()
+                        .id(fav.getId())
+                        .username(fav.getUser().getUsername())
+                        .cortometrajeId(fav.getCortometraje().getId())
+                        .cortometrajeTitle(fav.getCortometraje().getTitle())
+                        .createdAt(fav.getCreatedAt())
+                        .build())
+                .toList();
+    }
+
+    // ============================================================
+    // 🔧 ACTUALIZACIÓN Y GESTIÓN
+    // ============================================================
 
     @Override
     public FavoriteResponseDto addOrRestoreFavorite(FavoriteRequestDto dto, String username) {
@@ -121,28 +152,9 @@ public class FavoriteServiceImplMy8
                 .build();
     }
 
-    @Override
-    public List<FavoriteResponseDto> findAllByUsername(String username) {
-        User user = userService.findByUsername(username)
-                .orElseThrow(() -> new NotFoundException("Usuario no encontrado"));
-
-        return favoriteRepository.findByUserId(user.getId()).stream()
-                .filter(fav -> Boolean.TRUE.equals(fav.getIsActive()) &&
-                        Boolean.FALSE.equals(fav.getIsDeleted()) &&
-                        fav.getCortometraje() != null &&
-                        Boolean.TRUE.equals(fav.getCortometraje().getIsActive()) &&
-                        Boolean.FALSE.equals(fav.getCortometraje().getIsDeleted()) &&
-                        fav.getCortometraje().getUser() != null &&
-                        Boolean.TRUE.equals(fav.getCortometraje().getUser().getIsActive()))
-                .map(fav -> FavoriteResponseDto.builder()
-                        .id(fav.getId())
-                        .username(fav.getUser().getUsername())
-                        .cortometrajeId(fav.getCortometraje().getId())
-                        .cortometrajeTitle(fav.getCortometraje().getTitle())
-                        .createdAt(fav.getCreatedAt())
-                        .build())
-                .toList();
-    }
+    // ============================================================
+    // 🗑️ ELIMINACIÓN Y RESTAURACIÓN
+    // ============================================================
 
     @Override
     public void deleteFavoriteIfOwnerOrAdmin(Long id, String username) {
@@ -165,5 +177,4 @@ public class FavoriteServiceImplMy8
         favorite.setIsActive(false);
         favoriteRepository.save(favorite);
     }
-
 }

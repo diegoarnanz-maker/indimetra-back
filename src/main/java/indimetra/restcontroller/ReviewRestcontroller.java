@@ -25,6 +25,12 @@ public class ReviewRestcontroller extends BaseRestcontroller {
         @Autowired
         private IReviewService reviewService;
 
+        // ============================================
+        // 🔓 ZONA PÚBLICA (sin autenticación)
+        // ============================================
+
+        // 🔹 LECTURA
+
         @Operation(summary = "Obtener todas las reseñas")
         @GetMapping
         public ResponseEntity<ApiResponse<List<ReviewResponseDto>>> findAll() {
@@ -54,6 +60,12 @@ public class ReviewRestcontroller extends BaseRestcontroller {
                 return success(response, "Reseñas del cortometraje ID: " + cortometrajeId);
         }
 
+        // ============================================
+        // 👤 ZONA AUTENTICADO (ROLE_USER o ROLE_ADMIN)
+        // ============================================
+
+        // 🔹 LECTURA
+
         @Operation(summary = "Obtener reseñas del usuario autenticado")
         @PreAuthorize("hasAuthority('ROLE_USER')")
         @GetMapping("/mis-reviews")
@@ -61,6 +73,8 @@ public class ReviewRestcontroller extends BaseRestcontroller {
                 List<ReviewResponseDto> response = reviewService.findAllByUsername(getUsername());
                 return success(response, "Reseñas del usuario autenticado");
         }
+
+        // 🔹 GESTIÓN
 
         @Operation(summary = "Crear una nueva reseña")
         @PreAuthorize("hasAuthority('ROLE_USER')")

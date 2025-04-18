@@ -29,11 +29,14 @@ import indimetra.modelo.repository.IReviewRepository;
 import indimetra.modelo.repository.IRoleRepository;
 import indimetra.modelo.repository.IUserRepository;
 import indimetra.modelo.service.Base.GenericDtoServiceImpl;
+import indimetra.modelo.service.Cortometraje.ICortometrajeService;
+import indimetra.modelo.service.Cortometraje.helper.RatingService;
 import indimetra.modelo.service.Shared.Model.PagedResponse;
 import indimetra.modelo.service.User.Model.UserChangePasswordDto;
 import indimetra.modelo.service.User.Model.UserProfileUpdateDto;
 import indimetra.modelo.service.User.Model.UserRequestDto;
 import indimetra.modelo.service.User.Model.UserResponseDto;
+import jakarta.transaction.Transactional;
 
 @Service
 public class UserServiceImplMy8
@@ -54,6 +57,9 @@ public class UserServiceImplMy8
 
     @Autowired
     private IFavoriteRepository favoriteRepository;
+
+    @Autowired
+    private RatingService ratingService;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -84,6 +90,16 @@ public class UserServiceImplMy8
     }
 
     @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado con username: " + username));
+    }
+
+    // ============================================================
+    // 🔍 BÚSQUEDA Y LECTURA
+    // ============================================================
+
+    @Override
     public Optional<User> findByUsername(String username) {
         if (username == null || username.isBlank()) {
             throw new BadRequestException("El nombre de usuario no puede estar vacío");
@@ -98,6 +114,84 @@ public class UserServiceImplMy8
         }
         return userRepository.findByEmailAndIsActiveTrueAndIsDeletedFalse(email);
     }
+
+    @Override
+    public List<UserResponseDto> findByRole(String role) {
+        try {
+            Role.RoleType roleType = Role.RoleType.valueOf(role);
+            return userRepository.findByRoles_NameAndIsActiveTrueAndIsDeletedFalse(roleType).stream()
+                    .map(user -> modelMapper.map(user, UserResponseDto.class))
+                    .toList();
+
+        } catch (IllegalArgumentException ex) {
+            throw new BadRequestException("Rol no válido: " + role);
+        }
+    }
+
+    @Override
+    public List<UserResponseDto> findByUsernameContains(String username) {
+        return userRepository.findByUsernameContainingIgnoreCaseAndIsActiveTrueAndIsDeletedFalse(username).stream()
+                .map(user -> modelMapper.map(user, UserResponseDto.class))
+                .toList();
+    }
+
+    @Override
+    public PagedResponse<UserResponseDto> findAllPaginated(int page, int size) {
+        PageRequest pageable = PageRequest.of(page, size);
+        Page<User> userPage = userRepository.findAll(pageable);
+
+        List<UserResponseDto> data = userPage.getContent()
+                .stream()
+                .map(user -> modelMapper.map(user, UserResponseDto.class))
+                .toList();
+
+        return PagedResponse.<UserResponseDto>builder()
+                .message("Usuarios paginados correctamente")
+                .data(data)
+                .totalItems((int) userPage.getTotalElements())
+                .page(page)
+                .pageSize(size)
+                .build();
+    }
+
+    @Override
+    public Map<String, Integer> getUserCountByRole() {
+        List<User> activeUsers = userRepository.findByIsActiveTrueAndIsDeletedFalse();
+
+        Map<String, Integer> roleCount = new HashMap<>();
+
+        activeUsers.forEach(user -> {
+            user.getRoles().forEach(role -> {
+                String roleName = role.getName().name().replace("ROLE_", "").toLowerCase();
+                roleCount.put(roleName, roleCount.getOrDefault(roleName, 0) + 1);
+            });
+        });
+
+        return roleCount;
+    }
+
+    @Override
+    public PagedResponse<UserResponseDto> findActiveUsersPaginated(int page, int size) {
+        PageRequest pageable = PageRequest.of(page, size);
+        Page<User> userPage = userRepository.findByIsActiveTrueAndIsDeletedFalse(pageable);
+
+        List<UserResponseDto> data = userPage.getContent()
+                .stream()
+                .map(user -> modelMapper.map(user, UserResponseDto.class))
+                .toList();
+
+        return PagedResponse.<UserResponseDto>builder()
+                .message("Usuarios activos paginados correctamente")
+                .data(data)
+                .totalItems((int) userPage.getTotalElements())
+                .page(page)
+                .pageSize(size)
+                .build();
+    }
+
+    // ============================================================
+    // 🔧 ACTUALIZACIÓN Y GESTIÓN
+    // ============================================================
 
     @Override
     public void updateAuthorStatus(Long userId, boolean isAuthor) {
@@ -121,27 +215,6 @@ public class UserServiceImplMy8
     }
 
     @Override
-    public void deleteIfNotAdmin(Long id, String username) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Usuario no encontrado con ID: " + id));
-
-        boolean isAdmin = user.getRoles().stream()
-                .anyMatch(r -> r.getName().name().equals("ROLE_ADMIN"));
-
-        if (isAdmin) {
-            throw new BadRequestException("No se puede eliminar a un administrador");
-        }
-
-        userRepository.deleteById(id);
-    }
-
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado con username: " + username));
-    }
-
-    @Override
     public void changePassword(String username, UserChangePasswordDto dto) {
         if (!dto.getNewPassword().equals(dto.getRepeatPassword())) {
             throw new BadRequestException("Las contraseñas no coinciden");
@@ -152,48 +225,6 @@ public class UserServiceImplMy8
 
         user.setPassword(passwordEncoder.encode(dto.getNewPassword()));
         userRepository.save(user);
-    }
-
-    // @Override
-    // public void toggleUserStatus(Long userId, boolean enabled) {
-    // User user = userRepository.findById(userId)
-    // .orElseThrow(() -> new NotFoundException("Usuario no encontrado con ID: " +
-    // userId));
-
-    // user.setEnabled(enabled);
-    // userRepository.save(user);
-    // }
-
-    @Override
-    public List<UserResponseDto> findByRole(String role) {
-        try {
-            Role.RoleType roleType = Role.RoleType.valueOf(role);
-            return userRepository.findByRoles_NameAndIsActiveTrueAndIsDeletedFalse(roleType).stream()
-                    .map(user -> modelMapper.map(user, UserResponseDto.class))
-                    .toList();
-
-        } catch (IllegalArgumentException ex) {
-            throw new BadRequestException("Rol no válido: " + role);
-        }
-    }
-
-    @Override
-    public PagedResponse<UserResponseDto> findAllPaginated(int page, int size) {
-        PageRequest pageable = PageRequest.of(page, size);
-        Page<User> userPage = userRepository.findAll(pageable);
-
-        List<UserResponseDto> data = userPage.getContent()
-                .stream()
-                .map(user -> modelMapper.map(user, UserResponseDto.class))
-                .toList();
-
-        return PagedResponse.<UserResponseDto>builder()
-                .message("Usuarios paginados correctamente")
-                .data(data)
-                .totalItems((int) userPage.getTotalElements())
-                .page(page)
-                .pageSize(size)
-                .build();
     }
 
     @Override
@@ -216,29 +247,7 @@ public class UserServiceImplMy8
         userRepository.save(user);
     }
 
-    @Override
-    public List<UserResponseDto> findByUsernameContains(String username) {
-        return userRepository.findByUsernameContainingIgnoreCaseAndIsActiveTrueAndIsDeletedFalse(username).stream()
-                .map(user -> modelMapper.map(user, UserResponseDto.class))
-                .toList();
-    }
-
-    @Override
-    public Map<String, Integer> getUserCountByRole() {
-        List<User> allUsers = userRepository.findAll();
-
-        Map<String, Integer> roleCount = new HashMap<>();
-
-        allUsers.forEach(user -> {
-            user.getRoles().forEach(role -> {
-                String roleName = role.getName().name().replace("ROLE_", "").toLowerCase();
-                roleCount.put(roleName, roleCount.getOrDefault(roleName, 0) + 1);
-            });
-        });
-
-        return roleCount;
-    }
-
+    @Transactional
     @Override
     public void setUserActiveStatus(Long userId, boolean isActive) {
         User user = userRepository.findById(userId)
@@ -273,8 +282,27 @@ public class UserServiceImplMy8
                 favoriteRepository.saveAll(favoritos);
             }
         }
+
+        // Desactivar/activar reviews y favoritos HECHOS por el usuario
+        List<Review> userReviews = reviewRepository.findByUser(user);
+        for (Review review : userReviews) {
+            review.setIsActive(isActive);
+        }
+        reviewRepository.saveAll(userReviews);
+
+        List<Favorite> userFavorites = favoriteRepository.findByUserId(user.getId());
+        for (Favorite favorite : userFavorites) {
+            favorite.setIsActive(isActive);
+        }
+        favoriteRepository.saveAll(userFavorites);
+
+        for (Cortometraje corto : cortos) {
+            ratingService.actualizarRatingCortometraje(corto.getId());
+        }
+
     }
 
+    @Transactional
     @Override
     public void reactivateUser(Long userId) {
         User user = userRepository.findById(userId)
@@ -318,26 +346,32 @@ public class UserServiceImplMy8
                 favoriteRepository.saveAll(favoritos);
             }
         }
+
+        // Reactivar también las reviews HECHAS por el usuario
+        List<Review> userReviews = reviewRepository.findByUser(user);
+        for (Review review : userReviews) {
+            review.setIsActive(true);
+            review.setIsDeleted(false);
+        }
+        reviewRepository.saveAll(userReviews);
+
+        // Reactivar también los favoritos HECHOS por el usuario
+        List<Favorite> userFavorites = favoriteRepository.findByUserId(user.getId());
+        for (Favorite favorite : userFavorites) {
+            favorite.setIsActive(true);
+            favorite.setIsDeleted(false);
+        }
+        favoriteRepository.saveAll(userFavorites);
+
+        for (Cortometraje corto : cortos) {
+            ratingService.actualizarRatingCortometraje(corto.getId());
+        }
+
     }
 
-    @Override
-    public PagedResponse<UserResponseDto> findActiveUsersPaginated(int page, int size) {
-        PageRequest pageable = PageRequest.of(page, size);
-        Page<User> userPage = userRepository.findByIsActiveTrueAndIsDeletedFalse(pageable);
-
-        List<UserResponseDto> data = userPage.getContent()
-                .stream()
-                .map(user -> modelMapper.map(user, UserResponseDto.class))
-                .toList();
-
-        return PagedResponse.<UserResponseDto>builder()
-                .message("Usuarios activos paginados correctamente")
-                .data(data)
-                .totalItems((int) userPage.getTotalElements())
-                .page(page)
-                .pageSize(size)
-                .build();
-    }
+    // ============================================================
+    // 🗑️ ELIMINACIÓN Y RESTAURACIÓN
+    // ============================================================
 
     @Override
     public void softDeleteUser(Long id, String currentUsername) {
@@ -371,6 +405,21 @@ public class UserServiceImplMy8
 
         // Aplicar cascada
         applyCascadeSoftDelete(user);
+    }
+
+    @Override
+    public void deleteIfNotAdmin(Long id, String username) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Usuario no encontrado con ID: " + id));
+
+        boolean isAdmin = user.getRoles().stream()
+                .anyMatch(r -> r.getName().name().equals("ROLE_ADMIN"));
+
+        if (isAdmin) {
+            throw new BadRequestException("No se puede eliminar a un administrador");
+        }
+
+        userRepository.deleteById(id);
     }
 
     // Método auxiliar para lógica en cascada

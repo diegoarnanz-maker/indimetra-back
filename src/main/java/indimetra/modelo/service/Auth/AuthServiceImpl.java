@@ -37,6 +37,10 @@ public class AuthServiceImpl implements IAuthService {
     @Autowired
     private ModelMapper modelMapper;
 
+    // ============================================================
+    // 🔐 AUTENTICACIÓN
+    // ============================================================
+
     @Override
     public LoginResponseDto authenticateUser(LoginRequestDto loginDto) {
         User user = userRepository.findByUsername(loginDto.getUsername())
@@ -56,6 +60,10 @@ public class AuthServiceImpl implements IAuthService {
 
         return modelMapper.map(user, LoginResponseDto.class);
     }
+
+    // ============================================================
+    // 📝 REGISTRO
+    // ============================================================
 
     @Override
     @Transactional
@@ -87,6 +95,10 @@ public class AuthServiceImpl implements IAuthService {
         User savedUser = userRepository.save(user);
         return modelMapper.map(savedUser, UserResponseDto.class);
     }
+
+    // ============================================================
+    // 🙋 USUARIO AUTENTICADO
+    // ============================================================
 
     @Override
     public UserResponseDto getAuthenticatedUser(String username) {

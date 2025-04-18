@@ -78,6 +78,9 @@ public class CortometrajeServiceImplMy8
         entity.setId(id);
     }
 
+    // ============================================================
+    // 🔍 BÚSQUEDA Y LECTURA
+    // ============================================================
     @Override
     public List<CortometrajeResponseDto> findAll() {
         List<Cortometraje> cortosVisibles = cortometrajeRepository.findAllVisible();
@@ -182,11 +185,6 @@ public class CortometrajeServiceImplMy8
     }
 
     @Override
-    public void updateRating(Long id, BigDecimal rating) {
-        cortometrajeRepository.updateRating(id, rating);
-    }
-
-    @Override
     public Optional<Cortometraje> findByIdIfOwnerOrAdmin(Long id, User usuario) {
         Cortometraje cortometraje = readEntityById(id);
 
@@ -227,6 +225,74 @@ public class CortometrajeServiceImplMy8
         }
 
         return filtrados;
+    }
+
+    @Override
+    public List<CortometrajeResponseDto> findByUsername(String username) {
+        User user = userService.findByUsername(username)
+                .orElseThrow(() -> new NotFoundException("Usuario no encontrado: " + username));
+
+        List<Cortometraje> lista = cortometrajeRepository.findByUserAndIsActiveTrueAndIsDeletedFalse(user);
+
+        if (lista.isEmpty()) {
+            throw new NotFoundException("No tienes cortometrajes activos creados aún.");
+        }
+
+        return lista.stream()
+                .map(c -> modelMapper.map(c, CortometrajeResponseDto.class))
+                .toList();
+    }
+
+    @Override
+    public List<CortometrajeResponseDto> findByAuthor(String username) {
+        User user = userService.findByUsername(username)
+                .orElseThrow(() -> new NotFoundException("Usuario no encontrado: " + username));
+
+        List<Cortometraje> lista = cortometrajeRepository.findByUserAndIsActiveTrueAndIsDeletedFalse(user);
+
+        if (lista.isEmpty()) {
+            throw new NotFoundException("Este autor no tiene cortometrajes disponibles.");
+        }
+
+        return lista.stream()
+                .map(c -> modelMapper.map(c, CortometrajeResponseDto.class))
+                .toList();
+    }
+
+    @Override
+    public List<CortometrajeResponseDto> findByLanguage(String language) {
+        if (language == null || language.trim().isEmpty()) {
+            throw new BadRequestException("El idioma no puede estar vacío.");
+        }
+
+        List<Cortometraje> lista = cortometrajeRepository
+                .findByLanguageIgnoreCaseAndIsActiveTrueAndIsDeletedFalse(language);
+
+        if (lista.isEmpty()) {
+            throw new NotFoundException("No se encontraron cortometrajes en el idioma: " + language);
+        }
+
+        return lista.stream()
+                .map(c -> modelMapper.map(c, CortometrajeResponseDto.class))
+                .toList();
+    }
+
+    // ============================================================
+    // 🔧 ACTUALIZACIÓN Y GESTIÓN
+    // ============================================================
+    @Override
+    public void updateRating(Long id, BigDecimal rating) {
+        cortometrajeRepository.updateRating(id, rating);
+    }
+
+    @Override
+    public void actualizarRatingCortometraje(Long cortometrajeId) {
+        if (cortometrajeId == null || cortometrajeId <= 0) {
+            throw new BadRequestException("ID de cortometraje inválido");
+        }
+
+        BigDecimal promedio = reviewRepository.calcularPromedioRating(cortometrajeId);
+        cortometrajeRepository.updateRating(cortometrajeId, promedio != null ? promedio : BigDecimal.ZERO);
     }
 
     @Override
@@ -279,6 +345,9 @@ public class CortometrajeServiceImplMy8
         return modelMapper.map(actualizado, CortometrajeResponseDto.class);
     }
 
+    // ============================================================
+    // 🗑️ ELIMINACIÓN Y RESTAURACIÓN
+    // ============================================================
     @Override
     public void deleteIfOwnerOrAdmin(Long id, String username) {
         User usuario = userService.findByUsername(username)
@@ -313,56 +382,6 @@ public class CortometrajeServiceImplMy8
         if (!tieneMasCortometrajes && usuario.getIsAuthor()) {
             userService.updateAuthorStatus(usuario.getId(), false);
         }
-    }
-
-    @Override
-    public List<CortometrajeResponseDto> findByUsername(String username) {
-        User user = userService.findByUsername(username)
-                .orElseThrow(() -> new NotFoundException("Usuario no encontrado: " + username));
-
-        List<Cortometraje> lista = cortometrajeRepository.findByUserAndIsActiveTrueAndIsDeletedFalse(user);
-
-        if (lista.isEmpty()) {
-            throw new NotFoundException("No tienes cortometrajes activos creados aún.");
-        }
-
-        return lista.stream()
-                .map(c -> modelMapper.map(c, CortometrajeResponseDto.class))
-                .toList();
-    }
-
-    @Override
-    public List<CortometrajeResponseDto> findByAuthor(String username) {
-        User user = userService.findByUsername(username)
-                .orElseThrow(() -> new NotFoundException("Usuario no encontrado: " + username));
-
-        List<Cortometraje> lista = cortometrajeRepository.findByUserAndIsActiveTrueAndIsDeletedFalse(user);
-
-        if (lista.isEmpty()) {
-            throw new NotFoundException("Este autor no tiene cortometrajes disponibles.");
-        }
-
-        return lista.stream()
-                .map(c -> modelMapper.map(c, CortometrajeResponseDto.class))
-                .toList();
-    }
-
-    @Override
-    public List<CortometrajeResponseDto> findByLanguage(String language) {
-        if (language == null || language.trim().isEmpty()) {
-            throw new BadRequestException("El idioma no puede estar vacío.");
-        }
-
-        List<Cortometraje> lista = cortometrajeRepository
-                .findByLanguageIgnoreCaseAndIsActiveTrueAndIsDeletedFalse(language);
-
-        if (lista.isEmpty()) {
-            throw new NotFoundException("No se encontraron cortometrajes en el idioma: " + language);
-        }
-
-        return lista.stream()
-                .map(c -> modelMapper.map(c, CortometrajeResponseDto.class))
-                .toList();
     }
 
 }

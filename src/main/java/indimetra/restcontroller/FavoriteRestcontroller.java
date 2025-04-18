@@ -12,8 +12,11 @@ import indimetra.modelo.service.Favorite.Model.FavoriteRequestDto;
 import indimetra.modelo.service.Favorite.Model.FavoriteResponseDto;
 import indimetra.restcontroller.base.BaseRestcontroller;
 import indimetra.utils.ApiResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
+@Tag(name = "Favorite Controller", description = "Gestión de favoritos de cortometrajes")
 @RestController
 @CrossOrigin(origins = "*")
 @RequestMapping("/favorite")
@@ -22,8 +25,11 @@ public class FavoriteRestcontroller extends BaseRestcontroller {
         @Autowired
         private IFavoriteService favoriteService;
 
-        // Hay que ver si al solo tener que enviar en el body el cortometrajeId,
-        // enviarlo por el path
+        // ============================================
+        // 👤 ZONA USUARIO AUTENTICADO (ROLE_USER)
+        // ============================================
+
+        @Operation(summary = "Añadir un cortometraje a favoritos")
         @PreAuthorize("hasAuthority('ROLE_USER')")
         @PostMapping
         public ResponseEntity<ApiResponse<FavoriteResponseDto>> addFavorite(
@@ -33,6 +39,7 @@ public class FavoriteRestcontroller extends BaseRestcontroller {
                 return created(response, "Favorito añadido correctamente");
         }
 
+        @Operation(summary = "Obtener los favoritos del usuario autenticado")
         @PreAuthorize("hasAuthority('ROLE_USER')")
         @GetMapping("/mis-favoritos")
         public ResponseEntity<ApiResponse<List<FavoriteResponseDto>>> getMyFavorites() {
@@ -40,6 +47,11 @@ public class FavoriteRestcontroller extends BaseRestcontroller {
                 return success(response, "Favoritos del usuario");
         }
 
+        // ============================================
+        // 🔐 ZONA COMPARTIDA (ROLE_USER o ROLE_ADMIN)
+        // ============================================
+
+        @Operation(summary = "Eliminar un favorito (dueño o admin)")
         @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN')")
         @DeleteMapping("/{id}")
         public ResponseEntity<ApiResponse<Void>> deleteFavorite(@PathVariable Long id) {
@@ -47,33 +59,20 @@ public class FavoriteRestcontroller extends BaseRestcontroller {
                 return success(null, "Favorito eliminado correctamente");
         }
 
-        // Solo util si se quiere obtener todos los favoritos para hacer algun modulo de
-        // estadistica
+        // ============================================
+        // 🧪 OPCIONAL - Para uso interno o futuro (ADMIN)
+        // ============================================
+
+        // Este endpoint puede activarse en caso de estadísticas globales, uso interno,
+        // etc.
+        // @Operation(summary = "Obtener todos los favoritos (solo si se habilita para
+        // estadísticas)")
+        // @PreAuthorize("hasAuthority('ROLE_ADMIN')")
         // @GetMapping("/all")
-        // public ResponseEntity<List<FavoriteResponseDto>>
-        // getAllFavorites(Authentication authentication) {
-        // User user = userService.findByUsername(authentication.getName())
-        // .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-
-        // boolean isAdmin = user.getRoles().stream()
-        // .anyMatch(r -> r.getName().name().equals("ROLE_ADMIN"));
-
-        // if (!isAdmin) {
-        // return ResponseEntity.status(403).build();
-        // }
-
-        // List<Favorite> allFavorites = favoriteService.findAll();
-
-        // List<FavoriteResponseDto> response = allFavorites.stream()
-        // .map(fav -> {
-        // FavoriteResponseDto dto = modelMapper.map(fav, FavoriteResponseDto.class);
-        // dto.setUsername(fav.getUser().getUsername());
-        // dto.setCortometrajeId(fav.getCortometraje().getId());
-        // dto.setCortometrajeTitle(fav.getCortometraje().getTitle());
-        // return dto;
-        // })
-        // .collect(Collectors.toList());
-
-        // return ResponseEntity.ok(response);
+        // public ResponseEntity<ApiResponse<List<FavoriteResponseDto>>>
+        // getAllFavorites() {
+        // List<FavoriteResponseDto> response = favoriteService.findAll(); // Asumiendo
+        // que devuelve DTOs
+        // return success(response, "Todos los favoritos (modo administrador)");
         // }
 }

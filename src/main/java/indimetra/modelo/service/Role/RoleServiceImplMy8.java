@@ -45,6 +45,10 @@ public class RoleServiceImplMy8 extends GenericDtoServiceImpl<Role, RoleRequestD
         entity.setId(id);
     }
 
+    // ============================================================
+    // 🔍 BÚSQUEDA Y LECTURA
+    // ============================================================
+
     @Override
     public Optional<Role> findByName(String name) {
         if (name == null || name.trim().isEmpty()) {
@@ -52,6 +56,10 @@ public class RoleServiceImplMy8 extends GenericDtoServiceImpl<Role, RoleRequestD
         }
         return roleRepository.findByName(Role.RoleType.valueOf(name));
     }
+
+    // ============================================================
+    // 🔧 ACTUALIZACIÓN Y GESTIÓN
+    // ============================================================
 
     @Override
     public RoleResponseDto updateDescription(Long id, RoleUpdateRequestDto dto) {
