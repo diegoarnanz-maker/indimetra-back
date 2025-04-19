@@ -1,66 +1,76 @@
 package indimetra.restcontroller;
 
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
-import indimetra.modelo.dto.LoginDto;
-import indimetra.modelo.dto.UserRequestDto;
-import indimetra.modelo.dto.UserResponseDto;
-import indimetra.modelo.entity.User;
-import indimetra.modelo.service.IUserService;
+import indimetra.modelo.service.Auth.IAuthService;
+import indimetra.modelo.service.Auth.Model.LoginRequestDto;
+import indimetra.modelo.service.Auth.Model.LoginResponseDto;
+import indimetra.modelo.service.User.Model.UserRequestDto;
+import indimetra.modelo.service.User.Model.UserResponseDto;
+import indimetra.restcontroller.base.BaseRestcontroller;
+import indimetra.utils.ApiResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
+@Tag(name = "Auth Controller", description = "Autenticación y registro de usuarios")
 @RestController
 @CrossOrigin(origins = "*")
 @RequestMapping("/auth")
-public class AuthRestcontroller {
+public class AuthRestcontroller extends BaseRestcontroller {
 
     @Autowired
-    private IUserService userService;
+    private IAuthService authService;
 
-    @Autowired
-    private ModelMapper modelMapper;
+    // ============================================
+    // 🔐 ZONA AUTENTICACIÓN
+    // ============================================
 
+    @Operation(summary = "Iniciar sesión")
     @PostMapping("/login")
-    public ResponseEntity<Map<String, Object>> login(@RequestBody @Valid LoginDto loginDto) {
-        User user = userService.authenticateUser(loginDto.getUsername(), loginDto.getPassword());
+    public ResponseEntity<ApiResponse<LoginResponseDto>> login(@RequestBody @Valid LoginRequestDto loginDto) {
+        LoginResponseDto response = authService.authenticateUser(loginDto);
 
         SecurityContextHolder.getContext().setAuthentication(
-                new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword(), user.getAuthorities()));
+                new UsernamePasswordAuthenticationToken(
+                        response.getUsername(),
+                        null,
+                        response.getRoles().stream()
+                                .map(role -> new org.springframework.security.core.authority.SimpleGrantedAuthority(
+                                        role))
+                                .toList()));
 
-        return ResponseEntity.ok(Map.of(
-                "message", "Login exitoso",
-                "user", user.getUsername(),
-                "id", user.getId(),
-                "roles", user.getRoles().stream().map(r -> r.getName().name()).collect(Collectors.toSet())));
+        return success(response, "Usuario logueado correctamente");
     }
 
+    @Operation(summary = "Cerrar sesión")
     @PostMapping("/logout")
-    public ResponseEntity<Map<String, Object>> logout() {
+    public ResponseEntity<ApiResponse<Void>> logout() {
         SecurityContextHolder.clearContext();
-        return ResponseEntity.ok(Map.of("message", "Logout exitoso"));
+        return success(null, "Logout exitoso");
     }
 
+    @Operation(summary = "Registrar nuevo usuario")
     @PostMapping("/register")
-    public ResponseEntity<UserResponseDto> registerUser(@RequestBody @Valid UserRequestDto userDto) {
-        User newUser = userService.registerUser(userDto);
-        return ResponseEntity.status(201).body(modelMapper.map(newUser, UserResponseDto.class));
+    public ResponseEntity<ApiResponse<UserResponseDto>> registerUser(@RequestBody @Valid UserRequestDto userDto) {
+        UserResponseDto newUser = authService.registerUser(userDto);
+        return created(newUser, "Usuario registrado correctamente");
     }
 
-    @GetMapping("/me")
-    public ResponseEntity<UserResponseDto> getAuthenticatedUser(Authentication authentication) {
-        User user = userService.findByUsername(authentication.getName())
-                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + authentication.getName()));
+    // ============================================
+    // 👤 ZONA AUTENTICADO (ROLE_USER o ROLE_ADMIN)
+    // ============================================
 
-        return ResponseEntity.ok(modelMapper.map(user, UserResponseDto.class));
+    @Operation(summary = "Obtener datos del usuario autenticado")
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/me")
+    public ResponseEntity<ApiResponse<UserResponseDto>> getAuthenticatedUser() {
+        UserResponseDto user = authService.getAuthenticatedUser(getUsername());
+        return success(user, "Usuario autenticado");
     }
 }

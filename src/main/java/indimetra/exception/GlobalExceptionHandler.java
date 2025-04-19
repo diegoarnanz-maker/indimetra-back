@@ -1,50 +1,87 @@
 package indimetra.exception;
 
+import indimetra.exception.base.BaseApiException;
+import indimetra.utils.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ControllerAdvice;
-import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+/**
+ * Manejador global de excepciones para la aplicación.
+ * Captura y devuelve respuestas estandarizadas en caso de errores.
+ */
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    // Maneja excepciones cuando el usuario no es encontrado
-    @ExceptionHandler(UsernameNotFoundException.class)
-    public ResponseEntity<Map<String, Object>> handleUsernameNotFoundException(UsernameNotFoundException ex) {
-        Map<String, Object> response = new HashMap<>();
-        response.put("message", ex.getMessage());
-        response.put("status", HttpStatus.NOT_FOUND.value());
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-    }
+        /**
+         * Maneja errores cuando no se encuentra un usuario en el contexto de seguridad.
+         *
+         * @param ex excepción lanzada
+         * @return respuesta con estado 404 y mensaje de error
+         */
+        @ExceptionHandler(UsernameNotFoundException.class)
+        public ResponseEntity<ApiResponse<Object>> handleUsernameNotFoundException(UsernameNotFoundException ex) {
+                return ResponseEntity
+                                .status(HttpStatus.NOT_FOUND)
+                                .body(new ApiResponse<>(ex.getMessage()));
+        }
 
-    // Maneja excepciones de validaciones incorrectas en las peticiones
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, Object>> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        Map<String, Object> errors = new HashMap<>();
-        ex.getBindingResult().getFieldErrors()
-                .forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
+        /**
+         * Maneja errores de validación provenientes de anotaciones
+         * como @NotBlank, @Email, etc.
+         *
+         * @param ex excepción con errores de validación
+         * @return respuesta con estado 400 y detalles de los campos erróneos
+         */
+        @ExceptionHandler(MethodArgumentNotValidException.class)
+        public ResponseEntity<ApiResponse<Map<String, String>>> handleValidationExceptions(
+                        MethodArgumentNotValidException ex) {
+                Map<String, String> errors = ex.getBindingResult()
+                                .getFieldErrors()
+                                .stream()
+                                .collect(Collectors.toMap(
+                                                error -> error.getField(),
+                                                error -> error.getDefaultMessage(),
+                                                (msg1, msg2) -> msg1 // en caso de campos duplicados
+                                ));
 
-        Map<String, Object> response = new HashMap<>();
-        response.put("message", "Error de validación");
-        response.put("errors", errors);
-        response.put("status", HttpStatus.BAD_REQUEST.value());
+                ApiResponse<Map<String, String>> response = new ApiResponse<>();
+                response.setSuccess(false);
+                response.setMessage("Error de validación");
+                response.setData(errors);
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
-    }
+                return ResponseEntity.badRequest().body(response);
+        }
 
-    // Maneja excepciones generales en la aplicación
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String, Object>> handleGenericException(Exception ex) {
-        Map<String, Object> response = new HashMap<>();
-        response.put("message", "Ocurrió un error inesperado");
-        response.put("error", ex.getMessage());
-        response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
+        /**
+         * Maneja todas las excepciones personalizadas que extienden BaseApiException.
+         *
+         * @param ex excepción personalizada
+         * @return respuesta con el código de estado definido y mensaje de error
+         */
+        @ExceptionHandler(BaseApiException.class)
+        public ResponseEntity<ApiResponse<Object>> handleBaseApiException(BaseApiException ex) {
+                return ResponseEntity
+                                .status(ex.getStatus())
+                                .body(new ApiResponse<>(ex.getMessage()));
+        }
 
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-    }
+        /**
+         * Maneja cualquier excepción no controlada que no se haya capturado
+         * explícitamente.
+         *
+         * @param ex excepción genérica
+         * @return respuesta con estado 500 y mensaje de error genérico
+         */
+        @ExceptionHandler(Exception.class)
+        public ResponseEntity<ApiResponse<Object>> handleGenericException(Exception ex) {
+                return ResponseEntity
+                                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                .body(new ApiResponse<>("Error inesperado: " + ex.getMessage()));
+        }
 }
