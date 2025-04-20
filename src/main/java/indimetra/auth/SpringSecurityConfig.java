@@ -120,15 +120,17 @@ public class SpringSecurityConfig {
                         // ROLES
                         .requestMatchers("/role/**").hasAuthority("ROLE_ADMIN")
 
-                        // USUARIOS
+                        // USUARIOS - rutas públicas
+                        .requestMatchers(HttpMethod.GET, "/user/buscar/by-username/{username}").permitAll()
+
+                        // USUARIOS - protegidas
                         .requestMatchers(HttpMethod.GET,
                                 "/user",
                                 "/user/paginated",
                                 "/user/paginated/active",
                                 "/user/{id}",
                                 "/user/stats",
-                                "/user/buscar/by-role/{role}",
-                                "/user/buscar/by-username/{username}").hasAuthority("ROLE_ADMIN")
+                                "/user/buscar/by-role/{role}").hasAuthority("ROLE_ADMIN")
                         .requestMatchers(HttpMethod.PUT,
                                 "/user/toggle-role/{id}",
                                 "/user/deactivate/{id}",
