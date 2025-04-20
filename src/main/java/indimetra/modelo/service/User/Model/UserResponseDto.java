@@ -26,6 +26,9 @@ public class UserResponseDto {
 
     @Schema(description = "URL de la imagen de perfil del usuario", example = "https://indimetra.com/avatar.jpg")
     private String profileImage;
+    
+    @Schema(description = "Enlace del usuario a redes sociales", example = "https://twitter.com/usuario")
+    private String socialLinks;
 
     @Schema(description = "País de residencia", example = "España")
     private String country;
