@@ -71,8 +71,9 @@ public class SpringSecurityConfig {
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
 
                         // AUTH
-                        .requestMatchers(HttpMethod.POST, "/auth/login", "/auth/register").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/auth/login", "/auth/register", "/auth/logout").permitAll()
                         .requestMatchers(HttpMethod.GET, "/auth/me").authenticated()
+
 
                         // CORTOMETRAJES - Público y protegido
                         .requestMatchers(HttpMethod.GET,
