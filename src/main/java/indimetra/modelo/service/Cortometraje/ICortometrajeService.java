@@ -122,6 +122,8 @@ public interface ICortometrajeService
      */
     Optional<Cortometraje> findByIdIfOwnerOrAdmin(Long id, User usuario);
 
+    List<String> findAllLanguages();
+
     // ============================================================
     // 🔧 ACTUALIZACIÓN Y GESTIÓN
     // ============================================================

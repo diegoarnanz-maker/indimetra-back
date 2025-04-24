@@ -277,6 +277,16 @@ public class CortometrajeServiceImplMy8
                 .toList();
     }
 
+    @Override
+    public List<String> findAllLanguages() {
+        return cortometrajeRepository.findDistinctLanguages()
+                .stream()
+                .filter(lang -> lang != null && !lang.isBlank())
+                .distinct()
+                .sorted()
+                .toList();
+    }
+
     // ============================================================
     // 🔧 ACTUALIZACIÓN Y GESTIÓN
     // ============================================================

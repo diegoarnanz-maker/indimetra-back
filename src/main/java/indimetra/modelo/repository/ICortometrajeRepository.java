@@ -50,6 +50,9 @@ public interface ICortometrajeRepository extends JpaRepository<Cortometraje, Lon
 
     List<Cortometraje> findByUser(User user);
 
+    @Query("SELECT DISTINCT c.language FROM Cortometraje c")
+    List<String> findDistinctLanguages();
+
     /**
      * Busca cortometrajes por título (sin importar mayúsculas/minúsculas).
      */

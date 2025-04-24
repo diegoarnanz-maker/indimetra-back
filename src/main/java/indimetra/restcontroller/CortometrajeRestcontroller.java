@@ -75,6 +75,13 @@ public class CortometrajeRestcontroller extends BaseRestcontroller {
                 return success(response, "Cortometrajes en idioma: " + language);
         }
 
+        @Operation(summary = "Obtener todos los idiomas únicos")
+        @GetMapping("/buscar/idiomas")
+        public ResponseEntity<ApiResponse<List<String>>> obtenerIdiomasUnicos() {
+                List<String> idiomas = cortometrajeService.findAllLanguages();
+                return success(idiomas, "Idiomas disponibles");
+        }
+
         @Operation(summary = "Buscar por título")
         @GetMapping("/buscar/{title}")
         public ResponseEntity<ApiResponse<List<CortometrajeResponseDto>>> buscarPorTitulo(@PathVariable String title) {

@@ -88,6 +88,7 @@ public class SpringSecurityConfig {
                                 "/cortometraje/paginated",
                                 "/cortometraje/buscar/autor/{username}",
                                 "/cortometraje/buscar/idioma/{language}",
+                                "/cortometraje/buscar/idiomas",
                                 "/cortometraje/{id}").permitAll()
                         .requestMatchers(HttpMethod.GET, "/cortometraje/buscar/mis-cortometrajes").hasAuthority("ROLE_USER")
                         .requestMatchers(HttpMethod.POST, "/cortometraje").hasAuthority("ROLE_USER")
