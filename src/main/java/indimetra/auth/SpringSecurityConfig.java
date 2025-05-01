@@ -78,6 +78,7 @@ public class SpringSecurityConfig {
                         // CORTOMETRAJES - Público y protegido
                         .requestMatchers(HttpMethod.GET,
                                 "/cortometraje",
+                                "/cortometraje/filtrar",
                                 "/cortometraje/buscar/mis-cortometrajes",
                                 "/cortometraje/buscar/{title}",
                                 "/cortometraje/buscar/categoria/{categoryName}",

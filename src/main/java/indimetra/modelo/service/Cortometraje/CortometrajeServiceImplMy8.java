@@ -119,6 +119,25 @@ public class CortometrajeServiceImplMy8
     }
 
     @Override
+    public PagedResponse<CortometrajeResponseDto> buscarConFiltros(String genero, String idioma, String duracion,
+            Pageable pageable) {
+
+        Page<Cortometraje> pageResult = cortometrajeRepository.buscarConFiltros(genero, idioma, duracion, pageable);
+
+        List<CortometrajeResponseDto> dtoList = pageResult.getContent().stream()
+                .map(c -> modelMapper.map(c, CortometrajeResponseDto.class))
+                .toList();
+
+        return PagedResponse.<CortometrajeResponseDto>builder()
+                .message("Resultado filtrado")
+                .data(dtoList)
+                .totalItems((int) pageResult.getTotalElements())
+                .page(pageResult.getNumber())
+                .pageSize(pageResult.getSize())
+                .build();
+    }
+
+    @Override
     public Page<CortometrajeResponseDto> findAll(Pageable pageable) {
         return cortometrajeRepository.findAllVisible(pageable)
                 .map(c -> modelMapper.map(c, CortometrajeResponseDto.class));

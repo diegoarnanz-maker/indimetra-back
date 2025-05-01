@@ -111,6 +111,24 @@ public interface ICortometrajeRepository extends JpaRepository<Cortometraje, Lon
             """)
     Page<Cortometraje> findAllVisible(Pageable pageable);
 
+    @Query("""
+                SELECT c FROM Cortometraje c
+                WHERE c.isActive = true AND c.isDeleted = false
+                  AND (:genero IS NULL OR LOWER(c.category.name) = LOWER(:genero))
+                  AND (:idioma IS NULL OR LOWER(c.language) = LOWER(:idioma))
+                  AND (:duracion IS NULL OR
+                      (:duracion = '< 5 min' AND c.duration < 5) OR
+                      (:duracion = '5-10 min' AND c.duration BETWEEN 5 AND 10) OR
+                      (:duracion = '10-20 min' AND c.duration BETWEEN 11 AND 20) OR
+                      (:duracion = '> 20 min' AND c.duration > 20)
+                  )
+            """)
+    Page<Cortometraje> buscarConFiltros(
+            @Param("genero") String genero,
+            @Param("idioma") String idioma,
+            @Param("duracion") String duracion,
+            Pageable pageable);
+
     // ============================================================
     // ❓ VERIFICACIONES DE EXISTENCIA
     // ============================================================
@@ -124,4 +142,5 @@ public interface ICortometrajeRepository extends JpaRepository<Cortometraje, Lon
     boolean existsByTitleAndIdNot(String title, Long id);
 
     boolean existsByCategory(Category category);
+
 }

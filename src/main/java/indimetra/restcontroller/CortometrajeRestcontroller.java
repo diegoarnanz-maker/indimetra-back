@@ -52,6 +52,21 @@ public class CortometrajeRestcontroller extends BaseRestcontroller {
                 return ResponseEntity.ok(response);
         }
 
+        @Operation(summary = "Buscar cortometrajes con filtros y paginación")
+        @GetMapping("/filtrar")
+        public ResponseEntity<PagedResponse<CortometrajeResponseDto>> buscarConFiltros(
+                        @RequestParam(required = false) String genero,
+                        @RequestParam(required = false) String idioma,
+                        @RequestParam(required = false) String duracion,
+                        @RequestParam(defaultValue = "0") int page,
+                        @RequestParam(defaultValue = "12") int size) {
+
+                PagedResponse<CortometrajeResponseDto> response = cortometrajeService.buscarConFiltros(genero, idioma,
+                                duracion, PageRequest.of(page, size));
+
+                return ResponseEntity.ok(response);
+        }
+
         @Operation(summary = "Obtener un cortometraje por su ID")
         @GetMapping("/{id}")
         public ResponseEntity<ApiResponse<CortometrajeResponseDto>> findById(@PathVariable Long id) {

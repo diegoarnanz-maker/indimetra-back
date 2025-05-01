@@ -41,6 +41,9 @@ public interface ICortometrajeService
      */
     PagedResponse<CortometrajeResponseDto> findAllPaginated(Pageable pageable);
 
+    PagedResponse<CortometrajeResponseDto> buscarConFiltros(String genero, String idioma, String duracion,
+            Pageable pageable);
+
     /**
      * Busca los cortometrajes creados por un usuario específico (usado para "mis
      * cortos").
