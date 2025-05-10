@@ -72,6 +72,24 @@ public interface IUserService extends IGenericDtoService<User, UserRequestDto, U
     PagedResponse<UserResponseDto> findActiveUsersPaginated(int page, int size);
 
     /**
+     * Obtiene únicamente los usuarios eliminados en formato paginado.
+     *
+     * @param page número de página
+     * @param size tamaño de página
+     * @return respuesta paginada con usuarios eliminados
+     */
+    PagedResponse<UserResponseDto> findInactiveUsersPaginated(int page, int size);
+
+    /**
+     * Obtiene únicamente los usuarios eliminados en formato paginado.
+     *
+     * @param page número de página
+     * @param size tamaño de página
+     * @return respuesta paginada con usuarios eliminados
+     */
+    PagedResponse<UserResponseDto> findDeletedUsersPaginated(int page, int size);
+
+    /**
      * Devuelve un mapa con el número de usuarios por cada rol.
      *
      * @return mapa donde la clave es el rol y el valor es la cantidad de usuarios

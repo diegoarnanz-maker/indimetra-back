@@ -130,6 +130,8 @@ public class SpringSecurityConfig {
                                 "/user",
                                 "/user/paginated",
                                 "/user/paginated/active",
+                                "/user/paginated/inactive",
+                                "/user/paginated/deleted",
                                 "/user/{id}",
                                 "/user/stats",
                                 "/user/buscar/by-role/{role}").hasAuthority("ROLE_ADMIN")

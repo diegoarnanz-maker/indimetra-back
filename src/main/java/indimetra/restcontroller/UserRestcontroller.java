@@ -62,6 +62,26 @@ public class UserRestcontroller extends BaseRestcontroller {
         return success(pagedResponse, "Listado paginado de usuarios activos");
     }
 
+    @Operation(summary = "Obtener usuarios inactivos paginados")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @GetMapping("/paginated/inactive")
+    public ResponseEntity<ApiResponse<PagedResponse<UserResponseDto>>> findInactiveUsersPaginated(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        PagedResponse<UserResponseDto> pagedResponse = userService.findInactiveUsersPaginated(page, size);
+        return success(pagedResponse, "Listado paginado de usuarios inactivos");
+    }
+
+    @Operation(summary = "Obtener usuarios eliminados paginados")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @GetMapping("/paginated/deleted")
+    public ResponseEntity<ApiResponse<PagedResponse<UserResponseDto>>> findDeletedUsersPaginated(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        PagedResponse<UserResponseDto> pagedResponse = userService.findDeletedUsersPaginated(page, size);
+        return success(pagedResponse, "Listado paginado de usuarios eliminados");
+    }
+
     @Operation(summary = "Obtener un usuario por ID")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @GetMapping("/{id}")

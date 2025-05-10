@@ -69,6 +69,16 @@ public interface IUserRepository extends JpaRepository<User, Long> {
     Page<User> findByIsActiveTrueAndIsDeletedFalse(Pageable pageable);
 
     /**
+     * Obtiene una página de usuarios activos y no eliminados por rol.
+     */
+    Page<User> findByIsActiveFalseAndIsDeletedFalse(Pageable pageable);
+
+    /**
+     * Obtiene una página de usuarios activos y no eliminados por rol.
+     */
+    Page<User> findByIsDeletedTrue(Pageable pageable);
+
+    /**
      * Obtiene todos los usuarios activos y no eliminados.
      */
     List<User> findByIsActiveTrueAndIsDeletedFalse();

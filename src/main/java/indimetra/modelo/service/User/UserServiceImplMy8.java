@@ -189,6 +189,44 @@ public class UserServiceImplMy8
                 .build();
     }
 
+    @Override
+    public PagedResponse<UserResponseDto> findInactiveUsersPaginated(int page, int size) {
+        PageRequest pageable = PageRequest.of(page, size);
+        Page<User> userPage = userRepository.findByIsActiveFalseAndIsDeletedFalse(pageable);
+
+        List<UserResponseDto> data = userPage.getContent()
+                .stream()
+                .map(user -> modelMapper.map(user, UserResponseDto.class))
+                .toList();
+
+        return PagedResponse.<UserResponseDto>builder()
+                .message("Usuarios inactivos paginados correctamente")
+                .data(data)
+                .totalItems((int) userPage.getTotalElements())
+                .page(page)
+                .pageSize(size)
+                .build();
+    }
+
+    @Override
+    public PagedResponse<UserResponseDto> findDeletedUsersPaginated(int page, int size) {
+        PageRequest pageable = PageRequest.of(page, size);
+        Page<User> userPage = userRepository.findByIsDeletedTrue(pageable);
+
+        List<UserResponseDto> data = userPage.getContent()
+                .stream()
+                .map(user -> modelMapper.map(user, UserResponseDto.class))
+                .toList();
+
+        return PagedResponse.<UserResponseDto>builder()
+                .message("Usuarios eliminados paginados correctamente")
+                .data(data)
+                .totalItems((int) userPage.getTotalElements())
+                .page(page)
+                .pageSize(size)
+                .build();
+    }
+
     // ============================================================
     // 🔧 ACTUALIZACIÓN Y GESTIÓN
     // ============================================================
