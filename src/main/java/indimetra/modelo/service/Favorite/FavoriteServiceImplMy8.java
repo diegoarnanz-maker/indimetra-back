@@ -101,8 +101,10 @@ public class FavoriteServiceImplMy8
                         .username(fav.getUser().getUsername())
                         .cortometrajeId(fav.getCortometraje().getId())
                         .cortometrajeTitle(fav.getCortometraje().getTitle())
+                        .cortometrajeImageUrl(fav.getCortometraje().getImageUrl())
                         .createdAt(fav.getCreatedAt())
                         .build())
+
                 .toList();
     }
 

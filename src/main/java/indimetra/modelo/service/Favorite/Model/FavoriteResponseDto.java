@@ -25,6 +25,9 @@ public class FavoriteResponseDto {
     @Schema(description = "Título del cortometraje", example = "La noche estrellada")
     private String cortometrajeTitle;
 
+    @Schema(description = "URL de la imagen del cortometraje", example = "https://ejemplo.com/imagen.jpg")
+    private String cortometrajeImageUrl;
+
     @Schema(description = "Nombre de usuario que marcó el cortometraje como favorito", example = "usuario123")
     private String username;
 
