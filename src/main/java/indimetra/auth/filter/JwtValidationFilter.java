@@ -101,7 +101,7 @@ public class JwtValidationFilter extends BasicAuthenticationFilter {
             // Si el token es inválido o ha expirado, devolvemos respuesta 401
             Map<String, String> body = new HashMap<>();
             body.put("error", e.getMessage());
-            body.put("message", "El token es inválido o ha expirado.");
+            body.put("message", "El token es inválido o ha expirado");
 
             response.getWriter().write(new ObjectMapper().writeValueAsString(body));
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
