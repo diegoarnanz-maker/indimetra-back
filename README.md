@@ -11,10 +11,11 @@ Plataforma de difusión de cine independiente y de autor implementada con Spring
 ## Configuración
 
 1. Cree una base de datos en MySQL usando el script `src/main/resources/indimetra_app.sql`.
-2. Ajuste las credenciales de conexión en `src/main/resources/application.properties`:
+2. Ajuste las credenciales de conexión en `src/main/resources/application.properties` y, opcionalmente, cambie `server.port` si desea otro puerto:
    ```properties
    spring.datasource.username=TU_USUARIO
    spring.datasource.password=TU_PASSWORD
+   server.port=8080
    ```
 
 ## Ejecución
