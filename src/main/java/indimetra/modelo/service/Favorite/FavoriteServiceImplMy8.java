@@ -63,11 +63,6 @@ public class FavoriteServiceImplMy8
     // ============================================================
 
     @Override
-    public boolean isFavoriteOwner(Long userId, Long cortometrajeId) {
-        return favoriteRepository.findByUserIdAndCortometrajeId(userId, cortometrajeId).isPresent();
-    }
-
-    @Override
     public List<Favorite> findByUserId(Long userId) {
         if (userId == null || userId <= 0) {
             throw new BadRequestException("El ID del usuario no puede ser nulo o menor a 1");
