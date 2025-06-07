@@ -41,15 +41,6 @@ public interface IFavoriteService extends IGenericDtoService<Favorite, FavoriteR
      */
     List<FavoriteResponseDto> findAllByUsername(String username);
 
-    /**
-     * Verifica si el usuario es propietario del favorito de un cortometraje.
-     *
-     * @param userId         ID del usuario
-     * @param cortometrajeId ID del cortometraje
-     * @return true si el favorito existe y pertenece al usuario
-     */
-    boolean isFavoriteOwner(Long userId, Long cortometrajeId);
-
     // ============================================================
     // ➕ CREACIÓN Y RESTAURACIÓN
     // ============================================================

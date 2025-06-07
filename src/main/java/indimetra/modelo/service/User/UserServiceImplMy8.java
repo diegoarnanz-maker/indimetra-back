@@ -445,20 +445,6 @@ public class UserServiceImplMy8
         applyCascadeSoftDelete(user);
     }
 
-    @Override
-    public void deleteIfNotAdmin(Long id, String username) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Usuario no encontrado con ID: " + id));
-
-        boolean isAdmin = user.getRoles().stream()
-                .anyMatch(r -> r.getName().name().equals("ROLE_ADMIN"));
-
-        if (isAdmin) {
-            throw new BadRequestException("No se puede eliminar a un administrador");
-        }
-
-        userRepository.deleteById(id);
-    }
 
     // Método auxiliar para lógica en cascada
     private void applyCascadeSoftDelete(User user) {

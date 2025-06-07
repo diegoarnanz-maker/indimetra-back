@@ -144,13 +144,6 @@ public interface IUserService extends IGenericDtoService<User, UserRequestDto, U
     // 🗑️ ELIMINACIÓN Y RESTAURACIÓN
     // ============================================================
 
-    /**
-     * Elimina un usuario si el solicitante no es admin eliminándose a sí mismo.
-     *
-     * @param id              ID del usuario a eliminar
-     * @param currentUsername usuario autenticado que solicita la acción
-     */
-    void deleteIfNotAdmin(Long id, String currentUsername);
 
     /**
      * Realiza una eliminación lógica del usuario (soft delete).
